@@ -36,54 +36,54 @@ body {
 /* --- Topbar --- */
 .topbar {
   position: relative;
-  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   background: linear-gradient(90deg, var(--color-primary) 0%, #0a82d6 100%);
   color: var(--color-white);
-  padding: 10px 24px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  padding: 16px 32px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
 }
 /* Dunne, levendige accentlijn onderaan de header (rustig, geen poespas). */
 .topbar::after {
   content: "";
-  position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
+  position: absolute; left: 0; right: 0; bottom: 0; height: 5px;
   background: linear-gradient(to right, var(--color-accent), var(--color-accent-light));
 }
 .brand {
-  display: flex; align-items: center; gap: 10px;
-  font-weight: 800; font-size: 20px; letter-spacing: 0.3px;
+  display: flex; align-items: center; gap: 12px;
+  font-weight: 800; font-size: 24px; letter-spacing: 0.3px;
 }
-.brand img { max-height: 38px; width: auto; }
+.brand img { max-height: 48px; width: auto; }
 
-.topbar nav { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+.topbar nav { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }
 .topbar nav a {
-  display: inline-flex; align-items: center; gap: 6px;
-  color: rgba(255, 255, 255, 0.85); text-decoration: none; font-weight: 700;
-  font-size: 14px; padding: 8px 14px; border-radius: 10px;
+  display: inline-flex; align-items: center; gap: 8px;
+  color: rgba(255, 255, 255, 0.88); text-decoration: none; font-weight: 700;
+  font-size: 15.5px; padding: 11px 18px; border-radius: 12px;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
-.topbar nav a .ico { font-size: 15px; line-height: 1; }
-.topbar nav a:hover { background-color: rgba(255, 255, 255, 0.15); color: #fff; }
+.topbar nav a .ico { width: 20px; height: 20px; flex-shrink: 0; }
+.topbar nav a:hover { background-color: rgba(255, 255, 255, 0.16); color: #fff; }
 .topbar nav a.active { background-color: var(--color-white); color: var(--color-primary); }
 
-.topbar .user { display: flex; align-items: center; gap: 12px; }
+.topbar .user { display: flex; align-items: center; gap: 14px; }
 .user-info { display: flex; flex-direction: column; line-height: 1.2; text-align: right; }
-.user-naam { font-weight: 700; font-size: 14px; }
+.user-naam { font-weight: 700; font-size: 15px; }
 .user-rol {
   font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
   color: var(--color-white); background: var(--color-accent);
-  border-radius: 999px; padding: 1px 8px; align-self: flex-end; margin-top: 2px;
+  border-radius: 999px; padding: 2px 9px; align-self: flex-end; margin-top: 3px;
 }
 .topbar .user button {
   background: rgba(255, 255, 255, 0.16); color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.45); box-shadow: none;
-  padding: 7px 14px; font-size: 13px;
+  padding: 9px 16px; font-size: 14px;
 }
 .topbar .user button:hover { background: rgba(255, 255, 255, 0.28); transform: none; }
 
 @media (max-width: 860px) {
-  .topbar { gap: 10px; }
+  .topbar { gap: 12px; padding: 14px 18px; }
   .topbar nav { order: 3; width: 100%; }
-  .topbar nav a { font-size: 13px; padding: 7px 10px; }
+  .topbar nav a { font-size: 14px; padding: 9px 12px; }
 }
 
 .content {

@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import Icon from './Icon.jsx';
 
 const rolLabel = {
   vrijwilliger: 'Vrijwilliger',
@@ -21,13 +22,13 @@ export default function Layout() {
           ZwemStart
         </span>
         <nav>
-          {!heeftRol('coordinator') && <NavLink to="/dashboard"><span className="ico">📅</span>Mijn dag</NavLink>}
-          {heeftRol('coordinator') && <NavLink to="/leerlingen"><span className="ico">🧒</span>Leerlingen</NavLink>}
-          {heeftRol('coordinator') && <NavLink to="/badindeling"><span className="ico">🏊</span>Badindeling</NavLink>}
-          <NavLink to="/kennisbank"><span className="ico">📚</span>Kennisbank</NavLink>
-          {heeftRol('coordinator') && <NavLink to="/inschrijvingen"><span className="ico">📝</span>Inschrijvingen</NavLink>}
-          {heeftRol('coordinator') && <NavLink to="/locaties"><span className="ico">📍</span>Locaties</NavLink>}
-          {heeftRol('coordinator') && <NavLink to="/gebruikers"><span className="ico">👥</span>Gebruikers</NavLink>}
+          {!heeftRol('coordinator') && <NavLink to="/dashboard"><Icon naam="kalender" />Mijn dag</NavLink>}
+          {heeftRol('coordinator') && <NavLink to="/leerlingen"><Icon naam="kind" />Leerlingen</NavLink>}
+          {heeftRol('coordinator') && <NavLink to="/badindeling"><Icon naam="water" />Badindeling</NavLink>}
+          <NavLink to="/kennisbank"><Icon naam="boek" />Kennisbank</NavLink>
+          {heeftRol('coordinator') && <NavLink to="/inschrijvingen"><Icon naam="formulier" />Inschrijvingen</NavLink>}
+          {heeftRol('coordinator') && <NavLink to="/locaties"><Icon naam="locatie" />Locaties</NavLink>}
+          {heeftRol('coordinator') && <NavLink to="/gebruikers"><Icon naam="mensen" />Gebruikers</NavLink>}
         </nav>
         <div className="user">
           <span className="user-info">
