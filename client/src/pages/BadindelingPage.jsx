@@ -148,23 +148,30 @@ export default function BadindelingPage() {
   const setKind = (bi, zi, ki, veld, val) => muteer((b) => { b[bi].zones[zi].kinderen[ki][veld] = val; return b; });
   const removeKind = (bi, zi, ki) => muteer((b) => { b[bi].zones[zi].kinderen = b[bi].zones[zi].kinderen.filter((_, i) => i !== ki); return b; });
 
-  // Alle al-ingedeelde leerling-id's (over alle blokken/zones).
-  const ingedeeldeIds = new Set();
-  for (const b of blokken) for (const z of b.zones) for (const k of z.kinderen) ingedeeldeIds.add(k.leerling);
-  const nogIndelen = leerlingen.filter((l) => !ingedeeldeIds.has(l._id));
+  // Welk tijdsblok is open om te bewerken (accordion). Default: het eerste.
+  const [openBlok, setOpenBlok] = useState(0);
 
-  // Plaats een leerling in een zone (verwijdert 'm eerst uit een eventuele
-  // andere zone, zodat slepen tussen zones werkt).
+  // Leerling-id's die in een bepaald blok al ingedeeld zijn.
+  function ingedeeldInBlok(bi) {
+    const set = new Set();
+    (blokken[bi]?.zones || []).forEach((z) => z.kinderen.forEach((k) => set.add(k.leerling)));
+    return set;
+  }
+  // 'Nog in te delen' voor het open blok: kinderen die in DIT blok nog nergens staan.
+  // (Een kind kan in meerdere blokken zwemmen, dus dit is per blok.)
+  const ingedeeldHier = ingedeeldInBlok(openBlok);
+  const nogIndelen = leerlingen.filter((l) => !ingedeeldHier.has(l._id));
+
+  // Plaats een leerling in een zone. Haalt 'm eerst uit andere zones BINNEN
+  // hetzelfde blok (slepen tussen zones), maar laat 'm in andere blokken staan.
   function plaatsInZone(leerlingId, bi, zi) {
     muteer((b) => {
-      let bestaand = null;
-      for (const blok of b) {
-        for (const zone of blok.zones) {
-          const idx = zone.kinderen.findIndex((k) => k.leerling === leerlingId);
-          if (idx !== -1) { bestaand = zone.kinderen[idx]; zone.kinderen.splice(idx, 1); }
-        }
-      }
       if (!b[bi]?.zones[zi]) return b;
+      let bestaand = null;
+      for (const zone of b[bi].zones) {
+        const idx = zone.kinderen.findIndex((k) => k.leerling === leerlingId);
+        if (idx !== -1) { bestaand = zone.kinderen[idx]; zone.kinderen.splice(idx, 1); }
+      }
       b[bi].zones[zi].kinderen.push(bestaand || { leerling: leerlingId, status: 'aanwezig', niveau: '' });
       return b;
     });
@@ -186,8 +193,9 @@ export default function BadindelingPage() {
   function onDropLijst(e) {
     e.preventDefault();
     const id = e.dataTransfer.getData('text/plain') || sleept;
-    if (id) muteer((b) => { // uit alle zones halen = terug naar 'nog indelen'
-      for (const blok of b) for (const zone of blok.zones) {
+    // Terug naar 'nog indelen' = uit de zones van het OPEN blok halen.
+    if (id) muteer((b) => {
+      for (const zone of b[openBlok]?.zones || []) {
         zone.kinderen = zone.kinderen.filter((k) => k.leerling !== id);
       }
       return b;
@@ -218,13 +226,22 @@ export default function BadindelingPage() {
     } catch (e) { setFout(e.message); }
   }
 
+  // Tijdens export tijdelijk álle blokken tonen (niet alleen het open blok).
+  const [exportAlles, setExportAlles] = useState(false);
   async function exporteer(formaat) {
     setFout('');
+    setExportAlles(true);
+    // Wacht één frame zodat de DOM alle blokken heeft gerenderd.
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     try {
       const naam = `badindeling-${activiteitNaam?.naam || ''}-${datum}`.replace(/[^a-z0-9-]+/gi, '_');
       if (formaat === 'pdf') await exporteerNaarPdf(roosterRef.current, naam);
       else await exporteerNaarPng(roosterRef.current, naam);
-    } catch (e) { setFout('Export mislukt: ' + e.message); }
+    } catch (e) {
+      setFout('Export mislukt: ' + e.message);
+    } finally {
+      setExportAlles(false);
+    }
   }
 
   return (
@@ -278,13 +295,16 @@ export default function BadindelingPage() {
           {/* Linkerkolom: nog in te delen leerlingen (sleepbron + drop-doel). */}
           <div className="indeel-lijst noprint" onDragOver={(e) => e.preventDefault()} onDrop={onDropLijst}>
             <h3>Nog in te delen ({nogIndelen.length})</h3>
+            <p className="muted" style={{ marginTop: -4, fontSize: 12 }}>
+              voor blok: <strong>{blokken[openBlok]?.label || '—'}</strong>
+            </p>
             {nogIndelen.map((l) => (
               <div key={l._id} className="sleep-kind" draggable onDragStart={(e) => onDragStart(e, l._id)}>
                 {l.naam}
               </div>
             ))}
-            {nogIndelen.length === 0 && <p className="muted">Iedereen is ingedeeld.</p>}
-            <p className="muted hint">Sleep een kind naar een zone. Sleep terug hierheen om uit te delen.</p>
+            {nogIndelen.length === 0 && <p className="muted">Iedereen is ingedeeld in dit blok.</p>}
+            <p className="muted hint">Sleep een kind naar een zone. Sleep terug hierheen om uit dit blok te halen.</p>
           </div>
 
           {/* Rechterkolom: het rooster (geëxporteerd naar PNG/PDF). */}
@@ -295,14 +315,22 @@ export default function BadindelingPage() {
                 <span> · {new Date(datum).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
               </div>
 
-              {blokken.map((blok, bi) => (
-                <div key={bi} className="blok">
+              {blokken.map((blok, bi) => {
+                const open = exportAlles || openBlok === bi;
+                const aantalKinderen = blok.zones.reduce((n, z) => n + z.kinderen.length, 0);
+                return (
+                <div key={bi} className={`blok ${open ? 'blok-open' : 'blok-dicht'}`}>
                   <div className="blok-kop">
+                    <button type="button" className="blok-toggle noprint" onClick={() => setOpenBlok(open && !exportAlles ? -1 : bi)}>
+                      {open ? '▾' : '▸'}
+                    </button>
                     <input className="blok-label" value={blok.label} placeholder="bv. 19.00-19.30"
-                      onChange={(e) => setBlokLabel(bi, e.target.value)} />
-                    <button className="mini grijs noprint" onClick={() => addZone(bi)}>+ zone</button>
-                    <button className="mini grijs noprint" onClick={() => removeBlok(bi)}>blok ✕</button>
+                      onChange={(e) => setBlokLabel(bi, e.target.value)} onFocus={() => setOpenBlok(bi)} />
+                    <span className="blok-telling noprint">{aantalKinderen} kind{aantalKinderen === 1 ? '' : 'eren'}</span>
+                    {open && <button className="mini grijs noprint" onClick={() => addZone(bi)}>+ zone</button>}
+                    {open && <button className="mini grijs noprint" onClick={() => removeBlok(bi)}>blok ✕</button>}
                   </div>
+                  {open && (
                   <div className="zones">
                     {blok.zones.map((zone, zi) => (
                       <div key={zi} className="zone" onDragOver={(e) => e.preventDefault()} onDrop={(e) => onDropZone(e, bi, zi)}>
@@ -336,8 +364,10 @@ export default function BadindelingPage() {
                       </div>
                     ))}
                   </div>
+                  )}
                 </div>
-              ))}
+                );
+              })}
 
               {notities && <div className="rooster-notities"><strong>Notities:</strong> {notities}</div>}
               <div className="rooster-legenda">Legenda: nieuw = groen · oproep = geel · afwezig/verplaatst = grijs · taxi = oranje · (A/B/C) = diplomaniveau</div>

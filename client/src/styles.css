@@ -237,6 +237,14 @@ form button[type="submit"] { margin-top: 16px; }
 .blok { border: 2px solid var(--rand); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
 .blok-kop { display: flex; align-items: center; gap: 8px; background: var(--color-accent); padding: 6px 10px; }
 .blok-label { font-weight: 800; border: none; background: rgba(255,255,255,.85); border-radius: 6px; padding: 4px 8px; flex: 1; max-width: 220px; margin: 0; }
+.blok-toggle {
+  background: rgba(255,255,255,.3); color: #fff; border: none; box-shadow: none;
+  width: 28px; height: 28px; padding: 0; border-radius: 6px; font-size: 14px; line-height: 1;
+}
+.blok-toggle:hover { background: rgba(255,255,255,.45); transform: none; }
+.blok-telling { color: #fff; font-size: 12px; font-weight: 700; margin-left: auto; opacity: .9; }
+.blok-dicht { opacity: .92; }
+.blok-dicht .blok-telling { margin-left: auto; }
 
 .zones { display: flex; gap: 8px; padding: 10px; overflow-x: auto; align-items: flex-start; }
 .zone { flex: 0 0 180px; border: 1px solid var(--rand); border-radius: 8px; padding: 8px; background: var(--color-soft-blue); }
