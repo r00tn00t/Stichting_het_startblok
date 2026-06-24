@@ -21,7 +21,7 @@ export default function VrijwilligerDashboard() {
     api('/leerlingen').then(setDeelnemers).catch((e) => setFout(e.message));
   }, []);
 
-  const aantalVandaag = vandaag.reduce((n, g) => n + g.kinderen.length, 0);
+  const aantalVandaag = vandaag.reduce((n, g) => n + (g.kinderen?.length || 0), 0);
 
   return (
     <div>
@@ -47,15 +47,21 @@ export default function VrijwilligerDashboard() {
           )}
           {vandaag.map((groep, i) => (
             <div key={i} className="card">
-              <h3>{groep.activiteit?.naam || 'Activiteit'}</h3>
+              <h3>
+                {groep.activiteit?.naam || 'Activiteit'}
+                <span className="muted"> · {groep.blok} · {groep.zone}</span>
+              </h3>
               <div className="grid">
-                {groep.kinderen.map((k) => (
-                  <Link key={k._id} to={`/leerlingen/${k._id}`} className="card leerling-card">
-                    <h3>{k.naam}</h3>
-                    <p className="muted">{k.typeBeperking || '—'}</p>
-                    {k.niveau && <span className="badge">{k.niveau}</span>}
-                  </Link>
-                ))}
+                {groep.kinderen.map((k) => {
+                  const l = k.leerling || {};
+                  return (
+                    <Link key={l._id} to={`/leerlingen/${l._id}`} className={`card leerling-card status-kind-${k.status}`}>
+                      <h3>{l.naam}{k.niveau ? ` (${k.niveau})` : ''}</h3>
+                      <p className="muted">{l.typeBeperking || '—'}</p>
+                      {k.status !== 'aanwezig' && <span className="badge">{k.status}</span>}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           ))}

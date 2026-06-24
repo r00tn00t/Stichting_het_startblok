@@ -17,9 +17,14 @@ function dagStart(datumStr) {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
 
+// Populatie van de hele indeling (zones -> vrijwilliger + kinderen).
+function populeer(query) {
+  return query
+    .populate('blokken.zones.vrijwilliger', 'naam')
+    .populate('blokken.zones.kinderen.leerling', 'naam typeBeperking niveau');
+}
+
 // GET /api/badindelingen?activiteit=..&datum=YYYY-MM-DD
-// Coördinator/directie: de volledige indeling. Vrijwilliger: alleen als hij op
-// de activiteit zit (hij ziet de hele indeling, incl. wie welke kinderen heeft).
 router.get('/', asyncHandler(async (req, res) => {
   const { activiteit, datum } = req.query;
   if (!activiteit || !datum) {
@@ -28,7 +33,7 @@ router.get('/', asyncHandler(async (req, res) => {
   const dag = dagStart(datum);
   if (!dag) return res.status(400).json({ error: 'Ongeldige datum' });
 
-  const act = await Activiteit.findById(activiteit);
+  const act = await Activiteit.findById(activiteit).populate('locatie', 'naam plaats');
   if (!act) return res.status(404).json({ error: 'Activiteit niet gevonden' });
 
   const magBeheren = magActiviteitBeheren(req.user, act);
@@ -36,18 +41,13 @@ router.get('/', asyncHandler(async (req, res) => {
     return res.status(403).json({ error: 'Geen toegang tot deze activiteit' });
   }
 
-  const indeling = await Badindeling.findOne({ activiteit, datum: dag })
-    .populate('aanwezig', 'naam')
-    .populate('toewijzingen.vrijwilliger', 'naam')
-    .populate('toewijzingen.kinderen', 'naam');
-
-  res.json({ indeling, magBeheren });
+  const indeling = await populeer(Badindeling.findOne({ activiteit, datum: dag }));
+  res.json({ indeling, magBeheren, activiteit: act });
 }));
 
-// PUT /api/badindelingen — maak of werk de indeling bij (upsert) voor activiteit+datum.
-// Alleen coördinator (eigen locatie) of directie.
+// PUT /api/badindelingen — maak of werk de indeling bij (upsert).
 router.put('/', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) => {
-  const { activiteit, datum, aanwezig = [], toewijzingen = [] } = req.body || {};
+  const { activiteit, datum, blokken = [], notities = '' } = req.body || {};
   if (!activiteit || !datum) {
     return res.status(400).json({ error: 'activiteit en datum zijn verplicht' });
   }
@@ -60,53 +60,55 @@ router.put('/', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) =>
     return res.status(403).json({ error: 'Je mag deze activiteit niet indelen' });
   }
 
-  const indeling = await Badindeling.findOneAndUpdate(
-    { activiteit, datum: dag },
-    {
-      activiteit,
-      datum: dag,
-      aanwezig,
-      // alleen toewijzingen met een vrijwilliger bewaren
-      toewijzingen: toewijzingen.filter((t) => t.vrijwilliger),
-      gemaaktDoor: req.user.id,
-    },
-    { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
-  )
-    .populate('aanwezig', 'naam')
-    .populate('toewijzingen.vrijwilliger', 'naam')
-    .populate('toewijzingen.kinderen', 'naam');
+  // Lege ObjectId-velden (""), die niet casten, opschonen: een zone zonder
+  // vrijwilliger en kinderen zonder leerling-id worden genegeerd.
+  const schoneBlokken = (blokken || []).map((b) => ({
+    label: b.label,
+    zones: (b.zones || []).map((z) => ({
+      naam: z.naam,
+      vrijwilliger: z.vrijwilliger || undefined,
+      kinderen: (z.kinderen || [])
+        .filter((k) => k.leerling)
+        .map((k) => ({ leerling: k.leerling, status: k.status || 'aanwezig', niveau: k.niveau || '' })),
+    })),
+  }));
 
+  const indeling = await populeer(
+    Badindeling.findOneAndUpdate(
+      { activiteit, datum: dag },
+      { activiteit, datum: dag, blokken: schoneBlokken, notities, gemaaktDoor: req.user.id },
+      { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+    )
+  );
   res.json(indeling);
 }));
 
 // GET /api/badindelingen/mijn?datum=YYYY-MM-DD — "mijn kinderen vandaag".
-// Vrijwilliger ziet de kinderen die hem op die datum zijn toegewezen, over al
-// zijn activiteiten heen.
+// Vrijwilliger ziet, over al zijn activiteiten heen, de zones waarin hij staat.
 router.get('/mijn', asyncHandler(async (req, res) => {
-  const datum = req.query.datum;
-  const dag = dagStart(datum || new Date().toISOString());
+  const dag = dagStart(req.query.datum || new Date().toISOString());
   if (!dag) return res.status(400).json({ error: 'Ongeldige datum' });
-
   const dagEinde = new Date(dag.getTime() + 24 * 60 * 60 * 1000);
-  const indelingen = await Badindeling.find({
-    datum: { $gte: dag, $lt: dagEinde },
-    'toewijzingen.vrijwilliger': req.user.id,
-  })
-    .populate('activiteit', 'naam weekdag tijd')
-    .populate('toewijzingen.vrijwilliger', 'naam')
-    .populate('toewijzingen.kinderen', 'naam typeBeperking niveau');
 
-  // Trek per indeling alleen de eigen toewijzing eruit.
-  const resultaat = indelingen.map((ind) => {
-    const eigen = ind.toewijzingen.find(
-      (t) => t.vrijwilliger?._id?.toString() === req.user.id
-    );
-    return {
-      activiteit: ind.activiteit,
-      datum: ind.datum,
-      kinderen: eigen ? eigen.kinderen : [],
-    };
-  });
+  const indelingen = await populeer(
+    Badindeling.find({ datum: { $gte: dag, $lt: dagEinde } }).populate('activiteit', 'naam weekdag tijd')
+  );
+
+  const resultaat = [];
+  for (const ind of indelingen) {
+    for (const blok of ind.blokken) {
+      for (const zone of blok.zones) {
+        if (zone.vrijwilliger?._id?.toString() === req.user.id) {
+          resultaat.push({
+            activiteit: ind.activiteit,
+            blok: blok.label,
+            zone: zone.naam,
+            kinderen: zone.kinderen,
+          });
+        }
+      }
+    }
+  }
   res.json(resultaat);
 }));
 

@@ -141,14 +141,26 @@ async function run() {
     status: 'in-behandeling',
   });
 
-  // Badindeling voor vandaag: Sem is aanwezig en toegewezen aan de vrijwilliger.
+  // Badindeling voor vandaag: één tijdsblok met een ondiep-zone waarin de
+  // vrijwilliger Sem begeleidt.
   const nu = new Date();
   const vandaag = new Date(Date.UTC(nu.getUTCFullYear(), nu.getUTCMonth(), nu.getUTCDate()));
   await Badindeling.create({
     activiteit: zwemlesMaandag._id,
     datum: vandaag,
-    aanwezig: [sem._id],
-    toewijzingen: [{ vrijwilliger: vrijwilliger._id, kinderen: [sem._id] }],
+    blokken: [
+      {
+        label: '18.30-19.15',
+        zones: [
+          {
+            naam: 'ondiep',
+            vrijwilliger: vrijwilliger._id,
+            kinderen: [{ leerling: sem._id, status: 'aanwezig', niveau: 'A' }],
+          },
+        ],
+      },
+    ],
+    notities: '',
     gemaaktDoor: coordinator._id,
   });
 

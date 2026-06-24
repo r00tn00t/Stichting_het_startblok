@@ -1,18 +1,42 @@
 import mongoose from 'mongoose';
 
-// Eén toewijzing binnen een badindeling: een vrijwilliger met de kinderen die
-// hij/zij die avond begeleidt (één vrijwilliger → meerdere kinderen).
-const toewijzingSchema = new mongoose.Schema(
+// Statussen uit de papieren indeling (legenda): normaal aanwezig, nieuw,
+// opgeroepen, afwezig, verplaatst, met taxi.
+export const KIND_STATUSSEN = ['aanwezig', 'nieuw', 'oproep', 'afwezig', 'verplaatst', 'taxi'];
+export const DIPLOMA_NIVEAUS = ['', 'A', 'B', 'C'];
+
+// Eén kind binnen een zone: verwijzing + status + diplomaniveau (B/C-markering).
+const kindplaatsSchema = new mongoose.Schema(
   {
-    vrijwilliger: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    kinderen: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Leerling' }],
+    leerling: { type: mongoose.Schema.Types.ObjectId, ref: 'Leerling', required: true },
+    status: { type: String, enum: KIND_STATUSSEN, default: 'aanwezig' },
+    niveau: { type: String, enum: DIPLOMA_NIVEAUS, default: '' },
+  },
+  { _id: false }
+);
+
+// Eén zone/baan binnen een tijdsblok: naam (instelbaar door coördinator),
+// een vrijwilliger en de kinderen die daar zwemmen.
+const zoneSchema = new mongoose.Schema(
+  {
+    naam: { type: String, required: true },          // bv. "ondiep", "Baan 1", "Baan 3 diep"
+    vrijwilliger: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    kinderen: [kindplaatsSchema],
   },
   { _id: true }
 );
 
-// Een badindeling hoort bij één activiteit op één datum. De coördinator vinkt
-// eerst de aanwezige kinderen aan (aanwezigheids-stap) en koppelt ze daarna
-// aan vrijwilligers.
+// Eén tijdsblok binnen een avond: label + zones.
+const blokSchema = new mongoose.Schema(
+  {
+    label: { type: String, required: true },         // bv. "19.00-19.30"
+    zones: [zoneSchema],
+  },
+  { _id: true }
+);
+
+// Een badindeling hoort bij één activiteit op één datum en bevat tijdsblokken
+// met instelbare zones. De coördinator richt de zones zelf in per locatie.
 const badindelingSchema = new mongoose.Schema(
   {
     activiteit: {
@@ -21,12 +45,10 @@ const badindelingSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    // Datum (alleen de dag is relevant; opgeslagen als ISO-datum 00:00).
     datum: { type: Date, required: true, index: true },
-    // Aanwezige kinderen die avond (subset van de kinderen van de activiteit).
-    aanwezig: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Leerling' }],
-    // Koppelingen vrijwilliger → kinderen.
-    toewijzingen: [toewijzingSchema],
+    blokken: [blokSchema],
+    // Vrije notities (bv. "Taxi Daisy", "Anneloes afwezig").
+    notities: { type: String, default: '' },
     gemaaktDoor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
