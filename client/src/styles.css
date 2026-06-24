@@ -261,6 +261,34 @@ form button[type="submit"] { margin-top: 16px; }
 .rooster-notities { margin-top: 10px; font-size: 14px; }
 .rooster-legenda { margin-top: 8px; font-size: 12px; color: var(--grijs); }
 
+/* Werkblad: lijst links, rooster rechts */
+.badindeling-werkblad { display: flex; gap: 16px; align-items: flex-start; }
+.badindeling-rooster { flex: 1; min-width: 0; }
+.indeel-lijst {
+  flex: 0 0 200px; background: #fff; border: 2px solid var(--rand);
+  border-radius: 10px; padding: 12px; position: sticky; top: 12px;
+}
+.indeel-lijst h3 { margin: 0 0 8px; font-size: 1rem; }
+.sleep-kind {
+  background: var(--color-light-bg); color: var(--color-primary);
+  border-radius: 6px; padding: 6px 10px; margin-bottom: 6px;
+  font-weight: 600; font-size: 14px; cursor: grab;
+}
+.sleep-kind:active { cursor: grabbing; }
+.indeel-lijst .hint { margin-top: 10px; font-size: 12px; }
+.kopieer-rij { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.kopieer-rij input[type="date"] { margin: 0; padding: 5px 8px; border: 2px solid var(--rand); border-radius: 8px; }
+
+.zone { transition: outline .12s; }
+.zone:hover { outline: 2px dashed var(--color-accent); }
+.kind { cursor: grab; }
+.zone-leeg { list-style: none; color: var(--grijs); font-size: 12px; font-style: italic; padding: 6px; border: 1px dashed var(--rand); border-radius: 6px; text-align: center; }
+
+@media (max-width: 700px) {
+  .badindeling-werkblad { flex-direction: column; }
+  .indeel-lijst { position: static; width: 100%; flex-basis: auto; }
+}
+
 /* Tijdens export: verberg alle bewerk-elementen */
 .exporteren .noprint { display: none !important; }
 .exporteren .blok-label, .exporteren .zone-naam { background: transparent; }
