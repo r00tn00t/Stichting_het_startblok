@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const ROLLEN = [
   { value: 'vrijwilliger', label: 'Vrijwilliger' },
@@ -10,6 +11,10 @@ const ROLLEN = [
 const leegFormulier = { naam: '', email: '', wachtwoord: '', role: 'vrijwilliger', locaties: [], activiteiten: [] };
 
 export default function GebruikersPage() {
+  const { heeftRol } = useAuth();
+  const isDirectie = heeftRol('directie');
+  // Coördinator mag alleen vrijwilligers aanmaken/toewijzen.
+  const beschikbareRollen = isDirectie ? ROLLEN : ROLLEN.filter((r) => r.value === 'vrijwilliger');
   const [gebruikers, setGebruikers] = useState([]);
   const [locaties, setLocaties] = useState([]);
   const [activiteiten, setActiviteiten] = useState([]);
@@ -78,7 +83,11 @@ export default function GebruikersPage() {
   return (
     <div>
       <h1>Gebruikersbeheer</h1>
-      <p className="muted">Alleen de coördinator beheert gebruikers. Zelf-aangemelde vrijwilligers moeten eerst worden goedgekeurd voordat ze kunnen inloggen.</p>
+      <p className="muted">
+        {isDirectie
+          ? 'Beheer alle gebruikers, rollen en koppelingen. Zelf-aangemelde vrijwilligers moeten eerst worden goedgekeurd.'
+          : 'Beheer de vrijwilligers van je eigen locatie en keur nieuwe aanmeldingen goed. Coördinatoren en directie beheert de directie.'}
+      </p>
       {fout && <div className="alert">{fout}</div>}
       {melding && <div className="melding">{melding}</div>}
 
@@ -108,13 +117,16 @@ export default function GebruikersPage() {
             <label>Naam<input value={form.naam} onChange={set('naam')} required /></label>
             <label>E-mail<input type="email" value={form.email} onChange={set('email')} required /></label>
             <label>Tijdelijk wachtwoord<input type="text" value={form.wachtwoord} onChange={set('wachtwoord')} required /></label>
-            <label>
-              Rol
-              <select value={form.role} onChange={set('role')}>
-                {ROLLEN.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-              </select>
-            </label>
+            {isDirectie && (
+              <label>
+                Rol
+                <select value={form.role} onChange={set('role')}>
+                  {beschikbareRollen.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                </select>
+              </label>
+            )}
           </div>
+          {!isDirectie && <p className="muted">Je maakt een vrijwilliger aan. Rollen toekennen is voorbehouden aan directie.</p>}
 
           {form.role === 'coordinator' && (
             <div style={{ marginTop: 12 }}>
@@ -159,9 +171,13 @@ export default function GebruikersPage() {
                 <td>{g.naam}</td>
                 <td className="muted">{g.email}</td>
                 <td>
-                  <select value={g.role} onChange={(e) => wijzigRol(g._id, e.target.value)}>
-                    {ROLLEN.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                  </select>
+                  {isDirectie ? (
+                    <select value={g.role} onChange={(e) => wijzigRol(g._id, e.target.value)}>
+                      {ROLLEN.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                    </select>
+                  ) : (
+                    ROLLEN.find((r) => r.value === g.role)?.label.split(' (')[0] || g.role
+                  )}
                 </td>
                 <td>
                   {!g.goedgekeurd && <span className="badge" style={{ background: '#fff4e0', color: '#b45309' }}>Wacht op goedkeuring</span>}
