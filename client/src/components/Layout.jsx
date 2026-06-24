@@ -21,7 +21,9 @@ export default function Layout() {
           ZwemStart
         </span>
         <nav>
-          <NavLink to="/leerlingen">Leerlingen</NavLink>
+          {!heeftRol('coordinator') && <NavLink to="/dashboard">Mijn dag</NavLink>}
+          {heeftRol('coordinator') && <NavLink to="/leerlingen">Leerlingen</NavLink>}
+          {heeftRol('coordinator') && <NavLink to="/badindeling">Badindeling</NavLink>}
           <NavLink to="/kennisbank">Kennisbank</NavLink>
           {heeftRol('coordinator') && <NavLink to="/inschrijvingen">Inschrijvingen</NavLink>}
           {heeftRol('coordinator') && <NavLink to="/locaties">Locaties</NavLink>}

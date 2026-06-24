@@ -25,6 +25,24 @@ export function leerlingZichtbaarheidFilter(user) {
   return { activiteiten: { $in: user.activiteiten || [] } };
 }
 
+// Mag deze gebruiker een badindeling van deze activiteit maken/zien?
+// Vrijwilliger: alleen als hij/zij op die activiteit zit. Coördinator: als de
+// activiteit op een van zijn locaties valt. Directie: altijd.
+// `activiteit` moet een doc zijn met `locatie` (of populated locatie).
+export function magActiviteitBeheren(user, activiteit) {
+  if (user.role === ROLES.DIRECTIE) return true;
+  if (user.role === ROLES.COORDINATOR) {
+    const locId = activiteit.locatie?._id || activiteit.locatie;
+    return magLocatieBeheren(user, locId);
+  }
+  return false;
+}
+
+export function zitOpActiviteit(user, activiteitId) {
+  const eigen = new Set((user.activiteiten || []).map((a) => a.toString()));
+  return eigen.has(activiteitId.toString());
+}
+
 // Per-document check (voor detail-endpoints).
 export function magLeerlingZien(user, leerling) {
   if (user.role === ROLES.DIRECTIE) return true;

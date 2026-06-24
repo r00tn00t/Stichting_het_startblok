@@ -9,6 +9,7 @@ import { kennisbankItems } from './data/kennisbank.js';
 import { Inschrijving } from './models/Inschrijving.js';
 import { Locatie } from './models/Locatie.js';
 import { Activiteit } from './models/Activiteit.js';
+import { Badindeling } from './models/Badindeling.js';
 import { ROLES } from './config/roles.js';
 
 async function maakUser(naam, email, role, extra = {}) {
@@ -30,6 +31,7 @@ async function run() {
     Inschrijving.deleteMany({}),
     Locatie.deleteMany({}),
     Activiteit.deleteMany({}),
+    Badindeling.deleteMany({}),
   ]);
 
   // --- Locaties + activiteiten ---
@@ -51,7 +53,7 @@ async function run() {
     locaties: [pijnacker._id],
   });
   // Vrijwilliger ingeschreven op de maandagavond-zwemles (Pijnacker).
-  await maakUser('Vrijwilliger Demo', 'vrijwilliger@startblok.nl', ROLES.VRIJWILLIGER, {
+  const vrijwilliger = await maakUser('Vrijwilliger Demo', 'vrijwilliger@startblok.nl', ROLES.VRIJWILLIGER, {
     activiteiten: [zwemlesMaandag._id],
   });
 
@@ -137,6 +139,17 @@ async function run() {
     fysiotherapie: true, fysiotherapiePraktijk: 'FysioCentrum Delft',
     akkoordContributie: true, akkoordAlgemeneVoorwaarden: true,
     status: 'in-behandeling',
+  });
+
+  // Badindeling voor vandaag: Sem is aanwezig en toegewezen aan de vrijwilliger.
+  const nu = new Date();
+  const vandaag = new Date(Date.UTC(nu.getUTCFullYear(), nu.getUTCMonth(), nu.getUTCDate()));
+  await Badindeling.create({
+    activiteit: zwemlesMaandag._id,
+    datum: vandaag,
+    aanwezig: [sem._id],
+    toewijzingen: [{ vrijwilliger: vrijwilliger._id, kinderen: [sem._id] }],
+    gemaaktDoor: coordinator._id,
   });
 
   console.log('[seed] klaar. Login met *@startblok.nl / Wachtwoord1!');

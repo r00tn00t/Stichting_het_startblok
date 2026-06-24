@@ -230,6 +230,14 @@ form button[type="submit"] { margin-top: 16px; }
   width: auto; margin: 3px 0 0; flex-shrink: 0; accent-color: var(--color-primary);
 }
 
+/* Tabs (vrijwilliger-dashboard) */
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.tab {
+  background: #eef0f3; color: #344054; box-shadow: none;
+  border-radius: 1.5rem; padding: 0.5rem 1.2rem;
+}
+.tab.actief { background: var(--color-primary); color: #fff; }
+
 /* Kennisbank: één kolom, leesbare meerregelige inhoud */
 .kennis-lijst { display: flex; flex-direction: column; gap: 16px; }
 .kennis-inhoud { white-space: pre-wrap; line-height: 1.55; }

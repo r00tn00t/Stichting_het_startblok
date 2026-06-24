@@ -12,6 +12,8 @@ import ActiviteitInschrijvingPage from './pages/ActiviteitInschrijvingPage.jsx';
 import VrijwilligerRegistratiePage from './pages/VrijwilligerRegistratiePage.jsx';
 import InschrijvingenBeheerPage from './pages/InschrijvingenBeheerPage.jsx';
 import LocatiesPage from './pages/LocatiesPage.jsx';
+import BadindelingPage from './pages/BadindelingPage.jsx';
+import VrijwilligerDashboard from './pages/VrijwilligerDashboard.jsx';
 
 // Beschermt routes: stuurt naar /login als er geen sessie is.
 function Beveiligd({ children }) {
@@ -24,8 +26,15 @@ function Beveiligd({ children }) {
 // Vereist minimaal een bepaalde rol; anders terug naar de leerlingenlijst.
 function RolVereist({ minRol, children }) {
   const { heeftRol } = useAuth();
-  if (!heeftRol(minRol)) return <Navigate to="/leerlingen" replace />;
+  if (!heeftRol(minRol)) return <Navigate to="/" replace />;
   return children;
+}
+
+// Startpagina per rol: vrijwilliger → dashboard, coördinator/directie → leerlingen.
+function StartRedirect() {
+  const { user } = useAuth();
+  const doel = user?.role === 'vrijwilliger' ? '/dashboard' : '/leerlingen';
+  return <Navigate to={doel} replace />;
 }
 
 export default function App() {
@@ -44,7 +53,8 @@ export default function App() {
           </Beveiligd>
         }
       >
-        <Route index element={<Navigate to="/leerlingen" replace />} />
+        <Route index element={<StartRedirect />} />
+        <Route path="dashboard" element={<VrijwilligerDashboard />} />
         <Route path="leerlingen" element={<LeerlingenPage />} />
         <Route
           path="leerlingen/nieuw"
@@ -56,6 +66,10 @@ export default function App() {
           element={<RolVereist minRol="coordinator"><LeerlingFormPage /></RolVereist>}
         />
         <Route path="kennisbank" element={<KennisbankPage />} />
+        <Route
+          path="badindeling"
+          element={<RolVereist minRol="coordinator"><BadindelingPage /></RolVereist>}
+        />
         <Route
           path="locaties"
           element={<RolVereist minRol="coordinator"><LocatiesPage /></RolVereist>}
