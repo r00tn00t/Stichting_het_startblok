@@ -12,6 +12,7 @@ import ActiviteitInschrijvingPage from './pages/ActiviteitInschrijvingPage.jsx';
 import VrijwilligerRegistratiePage from './pages/VrijwilligerRegistratiePage.jsx';
 import InschrijvingenBeheerPage from './pages/InschrijvingenBeheerPage.jsx';
 import LocatiesPage from './pages/LocatiesPage.jsx';
+import TemplatesPage from './pages/TemplatesPage.jsx';
 import BadindelingPage from './pages/BadindelingPage.jsx';
 import VrijwilligerDashboard from './pages/VrijwilligerDashboard.jsx';
 
@@ -73,6 +74,10 @@ export default function App() {
         <Route
           path="locaties"
           element={<RolVereist minRol="coordinator"><LocatiesPage /></RolVereist>}
+        />
+        <Route
+          path="templates"
+          element={<RolVereist minRol="coordinator"><TemplatesPage /></RolVereist>}
         />
         <Route
           path="gebruikers"

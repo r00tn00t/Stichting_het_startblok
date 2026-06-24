@@ -288,6 +288,16 @@ form button[type="submit"] { margin-top: 16px; }
   .indeel-lijst { position: static; width: 100%; flex-basis: auto; }
 }
 
+/* Template-editor */
+.template-blok { border: 1px solid var(--rand); border-radius: 8px; padding: 10px; margin-top: 10px; background: var(--color-soft-blue); }
+.template-blok-kop { display: flex; gap: 8px; margin-bottom: 8px; }
+.template-blok-kop input { font-weight: 700; flex: 1; max-width: 280px; margin: 0; }
+.template-zones { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.template-zone { display: inline-flex; align-items: center; gap: 4px; }
+.template-zone input { width: 130px; margin: 0; }
+.template-rij { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rand); }
+.template-rij:last-child { border-bottom: none; }
+
 /* Tijdens export: verberg alle bewerk-elementen */
 .exporteren .noprint { display: none !important; }
 .exporteren .blok-label, .exporteren .zone-naam { background: transparent; }

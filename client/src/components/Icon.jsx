@@ -46,6 +46,12 @@ const paden = {
       <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11" />
     </>
   ),
+  sjabloon: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M3 9h18M9 9v12" />
+    </>
+  ),
 };
 
 export default function Icon({ naam, size = 20 }) {

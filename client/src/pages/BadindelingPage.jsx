@@ -52,6 +52,8 @@ export default function BadindelingPage() {
   const [blokken, setBlokken] = useState([]);
   const [notities, setNotities] = useState('');
   const [kopieerDatum, setKopieerDatum] = useState(datumMinusDagen(vandaagISO(), 7));
+  const [templates, setTemplates] = useState([]);
+  const [templateKeuze, setTemplateKeuze] = useState('');
 
   const [fout, setFout] = useState('');
   const [melding, setMelding] = useState('');
@@ -62,7 +64,26 @@ export default function BadindelingPage() {
 
   useEffect(() => {
     api('/activiteiten').then(setActiviteiten).catch((e) => setFout(e.message));
+    api('/templates').then(setTemplates).catch(() => {});
   }, []);
+
+  // Templates van de locatie van de gekozen activiteit.
+  const locatieId = activiteitNaam?.locatie?._id || activiteitNaam?.locatie;
+  const locatieTemplates = templates.filter((t) => (t.locatie?._id || t.locatie) === locatieId);
+
+  // Zet een template (blokken met zone-namen) om naar bewerkbare badindeling-blokken.
+  function templateNaarBlokken(template) {
+    return (template.blokken || []).map((b) => ({
+      label: b.label,
+      zones: (b.zones || []).map((naam) => ({ naam, vrijwilliger: '', kinderen: [] })),
+    }));
+  }
+  function pasTemplateToe(templateId) {
+    const t = templates.find((x) => x._id === templateId);
+    if (!t) return;
+    setBlokken(templateNaarBlokken(t));
+    setMelding(`Template "${t.naam}" toegepast. Deel in en sla op.`);
+  }
 
   // Activiteit voorselecteren op basis van de weekdag van de datum (alleen als
   // er nog niets gekozen is, zodat we een handmatige keuze niet overschrijven).
@@ -84,17 +105,34 @@ export default function BadindelingPage() {
       .catch((e) => setFout(e.message));
   }, [activiteitId]);
 
-  // Bestaande indeling laden.
+  // Bestaande indeling laden. Is er nog geen indeling én bestaat er een template
+  // voor deze locatie, dan die als startpunt voorvullen.
   useEffect(() => {
     if (!activiteitId || !datum) return;
     setMelding('');
     api(`/badindelingen?activiteit=${activiteitId}&datum=${datum}`)
       .then(({ indeling }) => {
-        setBlokken(normaliseerBlokken(indeling));
-        setNotities(indeling?.notities || '');
+        if (indeling && (indeling.blokken || []).length > 0) {
+          setBlokken(normaliseerBlokken(indeling));
+          setNotities(indeling.notities || '');
+          return;
+        }
+        // Leeg: probeer voor te vullen vanuit een template van deze locatie.
+        const t = locatieTemplates[0];
+        if (t) {
+          setBlokken(templateNaarBlokken(t));
+          setNotities('');
+          setMelding(`Voorgevuld met template "${t.naam}". Deel in en sla op.`);
+        } else {
+          setBlokken([]);
+          setNotities('');
+        }
       })
       .catch((e) => setFout(e.message));
-  }, [activiteitId, datum]);
+    // locatieTemplates verandert mee met templates+activiteit; bewust niet als dep
+    // om te voorkomen dat een handmatige bewerking wordt overschreven.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activiteitId, datum, templates]);
 
   // --- Mutaties ---
   const muteer = (fn) => setBlokken((prev) => fn(structuredClone(prev)));
@@ -216,12 +254,22 @@ export default function BadindelingPage() {
           </label>
         </div>
         {activiteitId && (
-          <div className="kopieer-rij">
-            <button className="mini grijs" onClick={() => kopieerVan(datumMinusDagen(datum, 7))}>↩ Kopieer vorige week</button>
-            <span className="muted">of van datum:</span>
-            <input type="date" value={kopieerDatum} onChange={(e) => setKopieerDatum(e.target.value)} />
-            <button className="mini grijs" onClick={() => kopieerVan(kopieerDatum)}>Kopieer</button>
-          </div>
+          <>
+            <div className="kopieer-rij">
+              <button className="mini grijs" onClick={() => kopieerVan(datumMinusDagen(datum, 7))}>↩ Kopieer vorige week</button>
+              <span className="muted">of van datum:</span>
+              <input type="date" value={kopieerDatum} onChange={(e) => setKopieerDatum(e.target.value)} />
+              <button className="mini grijs" onClick={() => kopieerVan(kopieerDatum)}>Kopieer</button>
+            </div>
+            <div className="kopieer-rij">
+              <span className="muted">Template:</span>
+              <select value={templateKeuze} onChange={(e) => { setTemplateKeuze(e.target.value); if (e.target.value) pasTemplateToe(e.target.value); }}>
+                <option value="">— kies een template —</option>
+                {locatieTemplates.map((t) => <option key={t._id} value={t._id}>{t.naam}</option>)}
+              </select>
+              {locatieTemplates.length === 0 && <span className="muted">(nog geen template voor deze locatie — maak er een onder “Sjablonen”)</span>}
+            </div>
+          </>
         )}
       </div>
 
