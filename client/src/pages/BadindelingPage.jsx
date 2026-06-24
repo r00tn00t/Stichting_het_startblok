@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client.js';
-import { exporteerNaarPng } from '../utils/exportImage.js';
+import { exporteerNaarPng, exporteerNaarPdf } from '../utils/exportImage.js';
 
 function vandaagISO() {
   return new Date().toISOString().slice(0, 10);
@@ -101,11 +101,15 @@ export default function BadindelingPage() {
     } catch (e) { setFout(e.message); }
   }
 
-  async function exporteer() {
+  async function exporteer(formaat) {
     setFout('');
     try {
       const naam = `badindeling-${activiteitNaam?.naam || ''}-${datum}`.replace(/[^a-z0-9-]+/gi, '_');
-      await exporteerNaarPng(roosterRef.current, naam);
+      if (formaat === 'pdf') {
+        await exporteerNaarPdf(roosterRef.current, naam);
+      } else {
+        await exporteerNaarPng(roosterRef.current, naam);
+      }
     } catch (e) {
       setFout('Export mislukt: ' + e.message);
     }
@@ -116,7 +120,8 @@ export default function BadindelingPage() {
       <div className="kop-rij">
         <h1>Badindeling</h1>
         <div style={{ display: 'flex', gap: 8 }}>
-          {blokken.length > 0 && <button className="grijs" onClick={exporteer}>📷 Exporteer als afbeelding</button>}
+          {blokken.length > 0 && <button className="grijs" onClick={() => exporteer('png')}>📷 Afbeelding</button>}
+          {blokken.length > 0 && <button className="grijs" onClick={() => exporteer('pdf')}>📄 PDF</button>}
           {activiteitId && <button onClick={opslaan}>Opslaan</button>}
         </div>
       </div>
