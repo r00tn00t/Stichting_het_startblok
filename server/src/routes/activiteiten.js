@@ -9,10 +9,24 @@ const router = Router();
 router.use(requireAuth);
 router.use(loadUserScope);
 
-// GET /api/activiteiten?locatie=...  — lijst (lezen)
+// GET /api/activiteiten?locatie=...  — lijst, gescoped op rol:
+// - directie: alle activiteiten
+// - coördinator: alleen activiteiten van de eigen locatie(s)
+// - vrijwilliger: alleen de eigen activiteiten
 router.get('/', asyncHandler(async (req, res) => {
   const filter = { actief: true };
-  if (req.query.locatie) filter.locatie = req.query.locatie;
+
+  // Eerst de rol-scope (kan niet omzeild worden via de query).
+  if (req.user.role === ROLES.COORDINATOR) {
+    filter.locatie = { $in: req.user.locaties || [] };
+  } else if (req.user.role === ROLES.VRIJWILLIGER) {
+    filter._id = { $in: req.user.activiteiten || [] };
+  }
+  // Optioneel verder filteren op één locatie binnen de toegestane scope.
+  if (req.query.locatie && req.user.role === ROLES.DIRECTIE) {
+    filter.locatie = req.query.locatie;
+  }
+
   const activiteiten = await Activiteit.find(filter).populate('locatie', 'naam plaats').sort({ naam: 1 });
   res.json(activiteiten);
 }));
