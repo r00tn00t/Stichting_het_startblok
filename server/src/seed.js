@@ -10,6 +10,7 @@ import { Inschrijving } from './models/Inschrijving.js';
 import { Locatie } from './models/Locatie.js';
 import { Activiteit } from './models/Activiteit.js';
 import { Badindeling } from './models/Badindeling.js';
+import { locatieData } from './data/locaties.js';
 import { ROLES } from './config/roles.js';
 
 async function maakUser(naam, email, role, extra = {}) {
@@ -34,16 +35,28 @@ async function run() {
     Badindeling.deleteMany({}),
   ]);
 
-  // --- Locaties + activiteiten ---
-  const pijnacker = await Locatie.create({ naam: 'Zwembad de Viergang', plaats: 'Pijnacker' });
-  const delft = await Locatie.create({ naam: 'Zwembad Kerkpolder', plaats: 'Delft' });
+  // --- Locaties + activiteiten (uit data/locaties.js) ---
+  const locById = {};   // key -> Locatie-doc
+  const actByKey = {};   // "lokKey::activiteitnaam" -> Activiteit-doc
+  for (const loc of locatieData) {
+    const locDoc = await Locatie.create({ naam: loc.naam, plaats: loc.plaats });
+    locById[loc.key] = locDoc;
+    for (const act of loc.activiteiten) {
+      const actDoc = await Activiteit.create({
+        naam: act.naam,
+        locatie: locDoc._id,
+        weekdag: act.weekdag || '',
+        tijd: act.tijd || '',
+        soort: act.soort || 'zwemles',
+      });
+      actByKey[`${loc.key}::${act.naam}`] = actDoc;
+    }
+  }
 
-  const zwemlesMaandag = await Activiteit.create({
-    naam: 'Zwemles - maandagavond', locatie: pijnacker._id, weekdag: 'maandag', tijd: '18:30-19:15', soort: 'zwemles',
-  });
-  const aquafitDinsdag = await Activiteit.create({
-    naam: 'Aquafit - dinsdagochtend', locatie: delft._id, weekdag: 'dinsdag', tijd: '09:30-10:15', soort: 'activiteit',
-  });
+  // Handige verwijzingen voor de demo-data.
+  const pijnacker = locById['viergang'];
+  const zwemlesMaandag = actByKey['viergang::Zwemles - maandagavond'];
+  const aquafitDinsdag = actByKey['deveur::Aquafit - dinsdagochtend'];
 
   // --- Gebruikers ---
   // Directie: geen locaties (= alle).
@@ -84,7 +97,7 @@ async function run() {
     naam: 'Lisa Jansen',
     typeBeperking: 'Spasticiteit (lichamelijk)',
     beperkingCategorie: 'lichamelijk',
-    locatie: delft._id,
+    locatie: locById['deveur']._id,
     activiteiten: [aquafitDinsdag._id],
     medischeAandachtspunten: [
       { titel: 'Beperkte beenkracht', omschrijving: 'Heeft drijfmiddel nodig bij benen.', urgentie: 'info' },
