@@ -61,11 +61,34 @@ cd client && npm install && npm run dev                                         
 
 ## Testgebruikers (na `npm run seed`)
 
-| Rol         | E-mail                    | Wachtwoord   | Ziet                                   |
-|-------------|---------------------------|--------------|----------------------------------------|
-| Directie    | directie@startblok.nl     | Wachtwoord1! | alles, alle locaties                   |
-| Coördinator | coordinator@startblok.nl  | Wachtwoord1! | kinderen/activiteiten van eigen locatie (Pijnacker) + goedkeuren |
-| Vrijwilliger| vrijwilliger@startblok.nl | Wachtwoord1! | kinderen van eigen activiteit (maandag-zwemles) |
+Alle accounts hebben wachtwoord **`Wachtwoord1!`**.
+
+### Demo-accounts
+
+| Rol         | E-mail                    | Ziet                                                            |
+|-------------|---------------------------|-----------------------------------------------------------------|
+| Directie    | directie@startblok.nl     | alles, alle locaties                                            |
+| Coördinator | coordinator@startblok.nl  | kinderen/activiteiten van eigen locatie (Pijnacker) + goedkeuren |
+| Vrijwilliger| vrijwilliger@startblok.nl | kinderen van eigen activiteit (maandag-zwemles)                 |
+
+### Coördinator per locatie
+
+Eén coördinator per zwembad; ziet alleen de leerlingen/activiteiten van die locatie.
+
+| E-mail                        | Locatie                              |
+|-------------------------------|--------------------------------------|
+| coordinator@viergang.nl       | Zwembad de Viergang, Pijnacker       |
+| coordinator@alexanderhof.nl   | Het Alexanderhof, Rotterdam          |
+| coordinator@watergeus.nl      | De Watergeus, Zoetermeer             |
+| coordinator@kerkpolder.nl     | Zwembad Kerkpolder, Delft            |
+| coordinator@hogebomen.nl      | De Hoge Bomen, Naaldwijk             |
+| coordinator@albrandswaard.nl  | Zwembad Albrandswaard, Poortugaal    |
+| coordinator@groenoord.nl      | Zwembad Groenoord, Schiedam          |
+| coordinator@deveur.nl         | Zwembad de Veur, Zoetermeer          |
+| coordinator@dekulk.nl         | Zwembad de Kulk, Vlaardingen         |
+
+> De locatie-coördinatoren kun je ook in een bestaande database (zonder te seeden)
+> aanmaken met: `node src/scripts/maakLocatieCoordinatoren.js` (vanuit `server/`).
 
 ## Privacy / AVG
 
