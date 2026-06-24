@@ -12,10 +12,10 @@ router.use(requireAuth);
 router.use(requireRole(ROLES.COORDINATOR));
 
 // GET /api/users
-router.get('/', async (_req, res) => {
+router.get('/', asyncHandler(async (_req, res) => {
   const users = await User.find().sort({ naam: 1 });
   res.json(users);
-});
+}));
 
 // POST /api/users — nieuwe gebruiker
 router.post('/', asyncHandler(async (req, res) => {
@@ -32,12 +32,17 @@ router.post('/', asyncHandler(async (req, res) => {
   res.status(201).json(user);
 }));
 
-// PUT /api/users/:id — rol / actief wijzigen
+// PUT /api/users/:id — rol / actief / goedkeuring wijzigen
 router.put('/:id', asyncHandler(async (req, res) => {
-  const { role, actief, naam } = req.body || {};
+  const { role, actief, naam, goedgekeurd } = req.body || {};
   const user = await User.findByIdAndUpdate(
     req.params.id,
-    { ...(role && { role }), ...(naam && { naam }), ...(actief !== undefined && { actief }) },
+    {
+      ...(role && { role }),
+      ...(naam && { naam }),
+      ...(actief !== undefined && { actief }),
+      ...(goedgekeurd !== undefined && { goedgekeurd }),
+    },
     { new: true, runValidators: true }
   );
   if (!user) return res.status(404).json({ error: 'Gebruiker niet gevonden' });

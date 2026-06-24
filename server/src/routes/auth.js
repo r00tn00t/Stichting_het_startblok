@@ -25,6 +25,10 @@ router.post('/login', asyncHandler(async (req, res) => {
   if (!user || !user.actief || !(await user.checkPassword(wachtwoord))) {
     return res.status(401).json({ error: 'Onjuiste inloggegevens' });
   }
+  // Wachtwoord klopt, maar account wacht nog op goedkeuring door de coördinator.
+  if (!user.goedgekeurd) {
+    return res.status(403).json({ error: 'Je account wacht nog op goedkeuring door een coördinator.' });
+  }
   res.json({ token: signToken(user), user: user.toJSON() });
 }));
 

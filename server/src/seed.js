@@ -31,6 +31,11 @@ async function run() {
   const trainer = await maakUser('Hoofdtrainer Demo', 'trainer@startblok.nl', ROLES.HOOFDTRAINER);
   await maakUser('Vrijwilliger Demo', 'vrijwilliger@startblok.nl', ROLES.VRIJWILLIGER);
 
+  // Zelf-aangemelde vrijwilliger die nog op goedkeuring wacht (toont de goedkeur-UI).
+  const wachtend = await maakUser('Sanne Wachtend', 'sanne@startblok.nl', ROLES.VRIJWILLIGER);
+  wachtend.goedgekeurd = false;
+  await wachtend.save();
+
   const sem = await Leerling.create({
     naam: 'Sem de Vries',
     typeBeperking: 'Autisme (ASS)',

@@ -8,9 +8,9 @@ import { asyncHandler } from '../middleware/asyncHandler.js';
 const router = Router();
 
 // POST /api/registratie/vrijwilliger — open zelfregistratie van een vrijwilliger.
-// AVG-RISICO: dit maakt direct een werkend account met leesrechten op dossiers
-// met gezondheidsgegevens. Bewuste keuze; de coördinator kan accounts deactiveren
-// via gebruikersbeheer. Overweeg later een goedkeuringsstap.
+// Een zelf-geregistreerde vrijwilliger komt 'in afwachting' binnen (goedgekeurd:
+// false) en heeft GEEN toegang tot dossiers tot de coördinator goedkeurt. Zo
+// kan niet iedereen met de aanmeldlink direct gezondheidsgegevens inzien (AVG).
 router.post('/vrijwilliger', asyncHandler(async (req, res) => {
   const { achternaam, email, telefoon, wachtwoord } = req.body || {};
   if (!achternaam || !email || !wachtwoord) {
@@ -27,11 +27,14 @@ router.post('/vrijwilliger', asyncHandler(async (req, res) => {
     email,
     telefoon,
     role: ROLES.VRIJWILLIGER,
+    goedgekeurd: false, // wacht op goedkeuring door de coördinator
   });
   await user.setPassword(wachtwoord);
   await user.save();
-  // Geen token teruggeven: gebruiker logt apart in.
-  res.status(201).json({ ok: true, message: 'Account aangemaakt. Je kunt nu inloggen.' });
+  res.status(201).json({
+    ok: true,
+    message: 'Account aangemaakt. Een coördinator beoordeelt je aanmelding; je kunt inloggen zodra deze is goedgekeurd.',
+  });
 }));
 
 // POST /api/registratie/inschrijving — leerling-inschrijving door ouder/verzorger.

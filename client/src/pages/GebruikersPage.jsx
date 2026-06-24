@@ -54,12 +54,41 @@ export default function GebruikersPage() {
     }
   }
 
+  async function goedkeuren(g) {
+    try {
+      await api(`/users/${g._id}`, { method: 'PUT', body: { goedgekeurd: true } });
+      setMelding(`${g.naam} is goedgekeurd en kan nu inloggen.`);
+      laad();
+    } catch (err) {
+      setFout(err.message);
+    }
+  }
+
   return (
     <div>
       <h1>Gebruikersbeheer</h1>
-      <p className="muted">Alleen de coördinator beheert gebruikers. Nieuwe accounts worden hier aangemaakt (geen zelfregistratie).</p>
+      <p className="muted">Alleen de coördinator beheert gebruikers. Zelf-aangemelde vrijwilligers moeten eerst worden goedgekeurd voordat ze kunnen inloggen.</p>
       {fout && <div className="alert">{fout}</div>}
       {melding && <div className="melding">{melding}</div>}
+
+      {gebruikers.some((g) => !g.goedgekeurd) && (
+        <div className="card" style={{ borderColor: 'var(--color-primary)' }}>
+          <h2>Wacht op goedkeuring</h2>
+          <p className="muted">Deze vrijwilligers hebben zich aangemeld en wachten op goedkeuring.</p>
+          <table className="tabel">
+            <thead><tr><th>Naam</th><th>E-mail</th><th></th></tr></thead>
+            <tbody>
+              {gebruikers.filter((g) => !g.goedgekeurd).map((g) => (
+                <tr key={g._id}>
+                  <td>{g.naam}</td>
+                  <td className="muted">{g.email}</td>
+                  <td><button className="mini" onClick={() => goedkeuren(g)}>Goedkeuren</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div className="card">
         <h2>Nieuwe gebruiker</h2>
@@ -96,6 +125,7 @@ export default function GebruikersPage() {
                   </select>
                 </td>
                 <td>
+                  {!g.goedgekeurd && <span className="badge" style={{ background: '#fff4e0', color: '#b45309' }}>Wacht op goedkeuring</span>}
                   <button className="mini grijs" onClick={() => wisselActief(g)}>
                     {g.actief ? 'Actief — deactiveren' : 'Inactief — heractiveren'}
                   </button>

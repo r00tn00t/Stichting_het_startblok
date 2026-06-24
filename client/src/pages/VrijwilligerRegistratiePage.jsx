@@ -31,7 +31,7 @@ export default function VrijwilligerRegistratiePage() {
       <div className="login-wrap">
         <div className="card login-card">
           <h1>Gelukt! 🎉</h1>
-          <p>Je account is aangemaakt. Je kunt nu inloggen.</p>
+          <p>Je account is aangemaakt. Een coördinator beoordeelt je aanmelding — je kunt inloggen zodra deze is goedgekeurd.</p>
           <Link to="/login" className="knop-link">Naar inloggen</Link>
         </div>
       </div>

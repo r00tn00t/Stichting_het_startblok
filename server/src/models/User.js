@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema(
     // Geheimhoudingsverklaring akkoord (AVG / vertrouwelijkheid).
     geheimhoudingAkkoord: { type: Boolean, default: false },
     actief: { type: Boolean, default: true },
+    // Zelf-geregistreerde vrijwilligers staan eerst 'in afwachting' en hebben
+    // GEEN toegang tot dossiers tot de coördinator goedkeurt. Door de coördinator
+    // aangemaakte accounts zijn meteen goedgekeurd.
+    goedgekeurd: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
