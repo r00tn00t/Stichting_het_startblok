@@ -1,6 +1,9 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import Icon from './Icon.jsx';
+
+// Pagina's die de volle schermbreedte gebruiken (breed rooster e.d.).
+const BREDE_PADEN = ['/badindeling'];
 
 const rolLabel = {
   vrijwilliger: 'Vrijwilliger',
@@ -10,6 +13,8 @@ const rolLabel = {
 
 export default function Layout() {
   const { user, logout, heeftRol } = useAuth();
+  const { pathname } = useLocation();
+  const breed = BREDE_PADEN.some((p) => pathname.startsWith(p));
   return (
     <div className="app">
       <header className="topbar">
@@ -39,7 +44,7 @@ export default function Layout() {
           <button onClick={logout}>Uitloggen</button>
         </div>
       </header>
-      <main className="content">
+      <main className={breed ? 'content content-breed' : 'content'}>
         <Outlet />
       </main>
     </div>

@@ -93,6 +93,8 @@ body {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
   animation: fade-in-up 0.5s ease-out;
 }
+/* Brede pagina's (badindeling): vrijwel volledige schermbreedte. */
+.content-breed { max-width: none; margin: 24px clamp(12px, 2vw, 28px); }
 
 /* --- Koppen --- */
 h1, h2, h3, h4 { color: var(--color-primary); font-weight: 800; }
