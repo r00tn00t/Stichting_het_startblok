@@ -61,7 +61,16 @@ async function run() {
   // --- Gebruikers ---
   // Directie: geen locaties (= alle).
   await maakUser('Directie Demo', 'directie@startblok.nl', ROLES.DIRECTIE);
-  // Coördinator van Pijnacker.
+
+  // Eén coördinator per locatie, gekoppeld aan die locatie (juiste rechten).
+  // E-mail op basis van de unieke locatie-key (plaats kan dubbel zijn).
+  for (const loc of locatieData) {
+    await maakUser(`Coördinator ${loc.plaats}`, `coordinator@${loc.key}.nl`, ROLES.COORDINATOR, {
+      locaties: [locById[loc.key]._id],
+    });
+  }
+
+  // Demo-coördinator van Pijnacker (gebruikt verderop in de seed-data).
   const coordinator = await maakUser('Coördinator Demo', 'coordinator@startblok.nl', ROLES.COORDINATOR, {
     locaties: [pijnacker._id],
   });
