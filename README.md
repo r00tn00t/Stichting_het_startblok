@@ -37,18 +37,26 @@ terugvinden.
 
 Vereist: Node 18+ en een draaiende MongoDB (`mongod`).
 
+### Snelste weg (alles in één terminal)
+
+```bash
+cp server/.env.example server/.env   # pas waarden aan (MONGODB_URI, JWT_SECRET)
+npm run install:all                  # installeert root + server + client
+npm run seed                         # vult testdata + testgebruikers
+npm run dev:all                      # start backend (4000) én frontend (5173)
+```
+
+`dev:all` draait beide processen tegelijk met gekleurde labels (`server` / `client`).
+Stoppen: `Ctrl+C`.
+
+### Apart starten (twee terminals)
+
 ```bash
 # 1. Backend
-cd server
-cp .env.example .env        # pas waarden aan
-npm install
-npm run seed                # vult testdata + 3 testgebruikers
-npm run dev                 # http://localhost:4000
+cd server && cp .env.example .env && npm install && npm run seed && npm run dev   # :4000
 
 # 2. Frontend (nieuwe terminal)
-cd client
-npm install
-npm run dev                 # http://localhost:5173
+cd client && npm install && npm run dev                                          # :5173
 ```
 
 ## Testgebruikers (na `npm run seed`)

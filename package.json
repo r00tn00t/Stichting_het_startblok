@@ -1,0 +1,16 @@
+{
+  "name": "zwemstart",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ZwemStart Digitaal — monorepo (client + server)",
+  "scripts": {
+    "dev:all": "concurrently -n server,client -c blue,magenta \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "seed": "npm --prefix server run seed",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
