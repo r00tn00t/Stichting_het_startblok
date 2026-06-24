@@ -114,13 +114,13 @@ export default function KennisbankPage() {
         </label>
       </div>
 
-      <div className="grid">
+      <div className="kennis-lijst">
         {items.map((item) => (
           <div key={item._id} className="card">
             <span className="badge">{typeLabel[item.type]}</span>
             {item.categorie?.map((c) => <span key={c} className="badge">{c}</span>)}
             <h3>{item.titel}</h3>
-            <p>{item.inhoud}</p>
+            <p className="kennis-inhoud">{item.inhoud}</p>
             {item.tags?.length > 0 && (
               <p className="muted">{item.tags.map((t) => `#${t}`).join(' ')}</p>
             )}

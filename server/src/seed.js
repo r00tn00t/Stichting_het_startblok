@@ -5,6 +5,7 @@ import { User } from './models/User.js';
 import { Leerling } from './models/Leerling.js';
 import { Voortgang } from './models/Voortgang.js';
 import { KennisbankItem } from './models/KennisbankItem.js';
+import { kennisbankItems } from './data/kennisbank.js';
 import { Inschrijving } from './models/Inschrijving.js';
 import { ROLES } from './config/roles.js';
 
@@ -71,24 +72,9 @@ async function run() {
     { leerling: lisa._id, onderdeel: 'Schoolslag benen', categorie: 'Diploma A', status: 'in-uitvoering', notitie: 'Met drijfmiddel goed, zonder nog niet.', geregistreerdDoor: trainer._id },
   ]);
 
-  await KennisbankItem.insertMany([
-    {
-      titel: 'Werken met pictogrammen bij ASS',
-      type: 'tip',
-      categorie: ['gedrag-ontwikkeling'],
-      inhoud: 'Gebruik visuele kaartjes voor "instappen", "drijven", "uitstappen". Toon de volgorde vooraf.',
-      tags: ['communicatie', 'structuur'],
-      aangemaaktDoor: coordinator._id,
-    },
-    {
-      titel: 'Oefening: vertrouwen in drijven opbouwen',
-      type: 'oefening',
-      categorie: [],
-      inhoud: 'Begin met drijven met ondersteuning aan de rug, bouw de steun stapsgewijs af.',
-      tags: ['watervrij', 'drijven'],
-      aangemaaktDoor: trainer._id,
-    },
-  ]);
+  await KennisbankItem.insertMany(
+    kennisbankItems.map((item) => ({ ...item, aangemaaktDoor: coordinator._id }))
+  );
 
   // Eén voorbeeld-inschrijving zodat het beheerscherm meteen iets toont.
   await Inschrijving.create({

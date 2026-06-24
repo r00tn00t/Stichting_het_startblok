@@ -230,6 +230,10 @@ form button[type="submit"] { margin-top: 16px; }
   width: auto; margin: 3px 0 0; flex-shrink: 0; accent-color: var(--color-primary);
 }
 
+/* Kennisbank: één kolom, leesbare meerregelige inhoud */
+.kennis-lijst { display: flex; flex-direction: column; gap: 16px; }
+.kennis-inhoud { white-space: pre-wrap; line-height: 1.55; }
+
 /* Publieke links onder loginformulier */
 .login-links { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; font-size: 14px; }
 .login-links a { color: var(--color-primary); font-weight: 700; text-decoration: none; }
