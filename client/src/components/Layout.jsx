@@ -3,8 +3,8 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 const rolLabel = {
   vrijwilliger: 'Vrijwilliger',
-  hoofdtrainer: 'Hoofdtrainer',
   coordinator: 'Coördinator',
+  directie: 'Directie',
 };
 
 export default function Layout() {
@@ -24,6 +24,7 @@ export default function Layout() {
           <NavLink to="/leerlingen">Leerlingen</NavLink>
           <NavLink to="/kennisbank">Kennisbank</NavLink>
           {heeftRol('coordinator') && <NavLink to="/inschrijvingen">Inschrijvingen</NavLink>}
+          {heeftRol('coordinator') && <NavLink to="/locaties">Locaties</NavLink>}
           {heeftRol('coordinator') && <NavLink to="/gebruikers">Gebruikers</NavLink>}
         </nav>
         <div className="user">

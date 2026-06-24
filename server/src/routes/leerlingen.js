@@ -1,19 +1,22 @@
 import { Router } from 'express';
 import { Leerling } from '../models/Leerling.js';
 import { Voortgang } from '../models/Voortgang.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { requireAuth, requireRole, loadUserScope } from '../middleware/auth.js';
 import { ROLES } from '../config/roles.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
+import { leerlingZichtbaarheidFilter, magLeerlingZien } from '../middleware/scope.js';
 
 const router = Router();
 
-// Alle endpoints vereisen login. Lezen mag iedereen; schrijven >= hoofdtrainer;
-// verwijderen alleen coördinator.
+// Alle endpoints vereisen login. Lezen is gefilterd op rol/locatie/activiteit;
+// schrijven >= coördinator (eigen locatie); verwijderen idem.
 router.use(requireAuth);
+router.use(loadUserScope);
 
-// GET /api/leerlingen — lijst (lezen)
+// GET /api/leerlingen — lijst, gefilterd op zichtbaarheid (rol + locatie/activiteit)
 router.get('/', asyncHandler(async (req, res) => {
-  const leerlingen = await Leerling.find({ actief: true }).sort({ naam: 1 });
+  const filter = { actief: true, ...leerlingZichtbaarheidFilter(req.user) };
+  const leerlingen = await Leerling.find(filter).sort({ naam: 1 });
   res.json(leerlingen);
 }));
 
@@ -21,12 +24,15 @@ router.get('/', asyncHandler(async (req, res) => {
 router.get('/:id', asyncHandler(async (req, res) => {
   const leerling = await Leerling.findById(req.params.id);
   if (!leerling) return res.status(404).json({ error: 'Leerling niet gevonden' });
+  if (!magLeerlingZien(req.user, leerling)) {
+    return res.status(403).json({ error: 'Je hebt geen toegang tot dit dossier' });
+  }
   const voortgang = await Voortgang.find({ leerling: leerling._id }).sort({ categorie: 1, onderdeel: 1 });
   res.json({ leerling, voortgang });
 }));
 
 // POST /api/leerlingen — nieuw (schrijven)
-router.post('/', requireRole(ROLES.HOOFDTRAINER), asyncHandler(async (req, res) => {
+router.post('/', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) => {
   const leerling = await Leerling.create({
     ...req.body,
     laatstGewijzigdDoor: req.user.id,
@@ -35,7 +41,7 @@ router.post('/', requireRole(ROLES.HOOFDTRAINER), asyncHandler(async (req, res) 
 }));
 
 // PUT /api/leerlingen/:id — bewerken (schrijven)
-router.put('/:id', requireRole(ROLES.HOOFDTRAINER), asyncHandler(async (req, res) => {
+router.put('/:id', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) => {
   const leerling = await Leerling.findByIdAndUpdate(
     req.params.id,
     { ...req.body, laatstGewijzigdDoor: req.user.id },
@@ -59,7 +65,7 @@ router.delete('/:id', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, r
 // --- Voortgang (digitale zwemkaart) ---
 
 // POST /api/leerlingen/:id/voortgang — nieuwe regel (schrijven)
-router.post('/:id/voortgang', requireRole(ROLES.HOOFDTRAINER), asyncHandler(async (req, res) => {
+router.post('/:id/voortgang', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) => {
   const regel = await Voortgang.create({
     ...req.body,
     leerling: req.params.id,
@@ -70,7 +76,7 @@ router.post('/:id/voortgang', requireRole(ROLES.HOOFDTRAINER), asyncHandler(asyn
 }));
 
 // PUT /api/leerlingen/:id/voortgang/:vid — status bijwerken (schrijven)
-router.put('/:id/voortgang/:vid', requireRole(ROLES.HOOFDTRAINER), asyncHandler(async (req, res) => {
+router.put('/:id/voortgang/:vid', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) => {
   const update = { ...req.body, geregistreerdDoor: req.user.id };
   if (req.body.status === 'behaald') update.behaaldOp = new Date();
   const regel = await Voortgang.findByIdAndUpdate(req.params.vid, update, {

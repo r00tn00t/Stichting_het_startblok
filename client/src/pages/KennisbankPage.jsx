@@ -17,7 +17,7 @@ const leegItem = { titel: '', type: 'tip', categorie: '', inhoud: '', tags: '' }
 
 export default function KennisbankPage() {
   const { heeftRol } = useAuth();
-  const magSchrijven = heeftRol('hoofdtrainer');
+  const magSchrijven = heeftRol('coordinator');
   const magVerwijderen = heeftRol('coordinator');
 
   const [items, setItems] = useState([]);

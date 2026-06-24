@@ -25,7 +25,7 @@ export default function LeerlingDetailPage() {
   const [toonNieuw, setToonNieuw] = useState(false);
   const [bewerktNotitie, setBewerktNotitie] = useState({}); // { regelId: tekst }
 
-  const magSchrijven = heeftRol('hoofdtrainer');
+  const magSchrijven = heeftRol('coordinator');
 
   function laad() {
     api(`/leerlingen/${id}`).then(setData).catch((e) => setFout(e.message));

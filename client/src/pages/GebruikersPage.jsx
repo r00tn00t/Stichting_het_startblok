@@ -2,15 +2,17 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 
 const ROLLEN = [
-  { value: 'vrijwilliger', label: 'Vrijwilliger (lezen)' },
-  { value: 'hoofdtrainer', label: 'Hoofdtrainer (lezen + schrijven)' },
-  { value: 'coordinator', label: 'Coördinator (volledig beheer)' },
+  { value: 'vrijwilliger', label: 'Vrijwilliger' },
+  { value: 'coordinator', label: 'Coördinator (beheert eigen locatie)' },
+  { value: 'directie', label: 'Directie (volledige toegang)' },
 ];
 
-const leegFormulier = { naam: '', email: '', wachtwoord: '', role: 'vrijwilliger' };
+const leegFormulier = { naam: '', email: '', wachtwoord: '', role: 'vrijwilliger', locaties: [], activiteiten: [] };
 
 export default function GebruikersPage() {
   const [gebruikers, setGebruikers] = useState([]);
+  const [locaties, setLocaties] = useState([]);
+  const [activiteiten, setActiviteiten] = useState([]);
   const [form, setForm] = useState(leegFormulier);
   const [fout, setFout] = useState('');
   const [melding, setMelding] = useState('');
@@ -18,9 +20,18 @@ export default function GebruikersPage() {
   function laad() {
     api('/users').then(setGebruikers).catch((e) => setFout(e.message));
   }
-  useEffect(laad, []);
+  useEffect(() => {
+    laad();
+    api('/locaties').then(setLocaties).catch(() => {});
+    api('/activiteiten').then(setActiviteiten).catch(() => {});
+  }, []);
 
   const set = (veld) => (e) => setForm({ ...form, [veld]: e.target.value });
+  const toggleArr = (veld, val) => (e) =>
+    setForm({
+      ...form,
+      [veld]: e.target.checked ? [...form[veld], val] : form[veld].filter((x) => x !== val),
+    });
 
   async function maakAan(e) {
     e.preventDefault();
@@ -104,6 +115,34 @@ export default function GebruikersPage() {
               </select>
             </label>
           </div>
+
+          {form.role === 'coordinator' && (
+            <div style={{ marginTop: 12 }}>
+              <strong>Locaties die deze coördinator beheert</strong>
+              <div className="checkbox-lijst">
+                {locaties.map((l) => (
+                  <label key={l._id} className="checkbox-rij">
+                    <input type="checkbox" checked={form.locaties.includes(l._id)} onChange={toggleArr('locaties', l._id)} />
+                    {l.naam} ({l.plaats})
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+          {form.role === 'vrijwilliger' && (
+            <div style={{ marginTop: 12 }}>
+              <strong>Activiteiten waarvoor deze vrijwilliger meehelpt</strong>
+              <div className="checkbox-lijst">
+                {activiteiten.map((a) => (
+                  <label key={a._id} className="checkbox-rij">
+                    <input type="checkbox" checked={form.activiteiten.includes(a._id)} onChange={toggleArr('activiteiten', a._id)} />
+                    {a.naam} {a.locatie?.naam ? `— ${a.locatie.naam}` : ''}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           <button type="submit">Gebruiker aanmaken</button>
         </form>
       </div>

@@ -11,6 +11,7 @@ import InschrijvingPage from './pages/InschrijvingPage.jsx';
 import ActiviteitInschrijvingPage from './pages/ActiviteitInschrijvingPage.jsx';
 import VrijwilligerRegistratiePage from './pages/VrijwilligerRegistratiePage.jsx';
 import InschrijvingenBeheerPage from './pages/InschrijvingenBeheerPage.jsx';
+import LocatiesPage from './pages/LocatiesPage.jsx';
 
 // Beschermt routes: stuurt naar /login als er geen sessie is.
 function Beveiligd({ children }) {
@@ -47,14 +48,18 @@ export default function App() {
         <Route path="leerlingen" element={<LeerlingenPage />} />
         <Route
           path="leerlingen/nieuw"
-          element={<RolVereist minRol="hoofdtrainer"><LeerlingFormPage /></RolVereist>}
+          element={<RolVereist minRol="coordinator"><LeerlingFormPage /></RolVereist>}
         />
         <Route path="leerlingen/:id" element={<LeerlingDetailPage />} />
         <Route
           path="leerlingen/:id/bewerken"
-          element={<RolVereist minRol="hoofdtrainer"><LeerlingFormPage /></RolVereist>}
+          element={<RolVereist minRol="coordinator"><LeerlingFormPage /></RolVereist>}
         />
         <Route path="kennisbank" element={<KennisbankPage />} />
+        <Route
+          path="locaties"
+          element={<RolVereist minRol="coordinator"><LocatiesPage /></RolVereist>}
+        />
         <Route
           path="gebruikers"
           element={<RolVereist minRol="coordinator"><GebruikersPage /></RolVereist>}

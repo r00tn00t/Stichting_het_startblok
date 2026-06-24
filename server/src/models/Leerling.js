@@ -41,6 +41,11 @@ const leerlingSchema = new mongoose.Schema(
 
     niveau: { type: String, default: '' },               // huidig zwemniveau / fase
 
+    // Koppeling aan locatie en activiteit(en). Bepaalt wie het kind mag zien:
+    // coördinator van de locatie, en vrijwilligers die op dezelfde activiteit zitten.
+    locatie: { type: mongoose.Schema.Types.ObjectId, ref: 'Locatie', index: true },
+    activiteiten: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activiteit' }],
+
     // Contactpersoon (ouder/verzorger) — minimale dataverzameling.
     contactNaam: { type: String, default: '' },
     contactTelefoon: { type: String, default: '' },

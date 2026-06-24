@@ -19,14 +19,20 @@ router.get('/', asyncHandler(async (_req, res) => {
 
 // POST /api/users — nieuwe gebruiker
 router.post('/', asyncHandler(async (req, res) => {
-  const { naam, email, wachtwoord, role } = req.body || {};
+  const { naam, email, wachtwoord, role, locaties, activiteiten } = req.body || {};
   if (!naam || !email || !wachtwoord) {
     return res.status(400).json({ error: 'Naam, e-mail en wachtwoord verplicht' });
   }
   if (await User.findOne({ email: email.toLowerCase() })) {
     return res.status(409).json({ error: 'E-mail al in gebruik' });
   }
-  const user = new User({ naam, email, role });
+  const user = new User({
+    naam,
+    email,
+    role,
+    ...(Array.isArray(locaties) && { locaties }),
+    ...(Array.isArray(activiteiten) && { activiteiten }),
+  });
   await user.setPassword(wachtwoord);
   await user.save();
   res.status(201).json(user);
@@ -34,7 +40,7 @@ router.post('/', asyncHandler(async (req, res) => {
 
 // PUT /api/users/:id — rol / actief / goedkeuring wijzigen
 router.put('/:id', asyncHandler(async (req, res) => {
-  const { role, actief, naam, goedgekeurd } = req.body || {};
+  const { role, actief, naam, goedgekeurd, locaties, activiteiten } = req.body || {};
   const user = await User.findByIdAndUpdate(
     req.params.id,
     {
@@ -42,6 +48,8 @@ router.put('/:id', asyncHandler(async (req, res) => {
       ...(naam && { naam }),
       ...(actief !== undefined && { actief }),
       ...(goedgekeurd !== undefined && { goedgekeurd }),
+      ...(Array.isArray(locaties) && { locaties }),
+      ...(Array.isArray(activiteiten) && { activiteiten }),
     },
     { new: true, runValidators: true }
   );

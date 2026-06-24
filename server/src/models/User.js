@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema(
       default: ROLES.VRIJWILLIGER,
       required: true,
     },
+    // Coördinator: beheert deze locatie(s). Directie: leeg = alle locaties.
+    locaties: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Locatie' }],
+    // Vrijwilliger: activiteiten waarvoor hij/zij zich heeft ingeschreven.
+    activiteiten: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activiteit' }],
     // Geheimhoudingsverklaring akkoord (AVG / vertrouwelijkheid).
     geheimhoudingAkkoord: { type: Boolean, default: false },
     actief: { type: Boolean, default: true },

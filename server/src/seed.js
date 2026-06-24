@@ -7,10 +7,12 @@ import { Voortgang } from './models/Voortgang.js';
 import { KennisbankItem } from './models/KennisbankItem.js';
 import { kennisbankItems } from './data/kennisbank.js';
 import { Inschrijving } from './models/Inschrijving.js';
+import { Locatie } from './models/Locatie.js';
+import { Activiteit } from './models/Activiteit.js';
 import { ROLES } from './config/roles.js';
 
-async function maakUser(naam, email, role) {
-  const u = new User({ naam, email, role, geheimhoudingAkkoord: true });
+async function maakUser(naam, email, role, extra = {}) {
+  const u = new User({ naam, email, role, geheimhoudingAkkoord: true, ...extra });
   await u.setPassword('Wachtwoord1!');
   await u.save();
   return u;
@@ -26,11 +28,32 @@ async function run() {
     Voortgang.deleteMany({}),
     KennisbankItem.deleteMany({}),
     Inschrijving.deleteMany({}),
+    Locatie.deleteMany({}),
+    Activiteit.deleteMany({}),
   ]);
 
-  const coordinator = await maakUser('Coördinator Demo', 'coordinator@startblok.nl', ROLES.COORDINATOR);
-  const trainer = await maakUser('Hoofdtrainer Demo', 'trainer@startblok.nl', ROLES.HOOFDTRAINER);
-  await maakUser('Vrijwilliger Demo', 'vrijwilliger@startblok.nl', ROLES.VRIJWILLIGER);
+  // --- Locaties + activiteiten ---
+  const pijnacker = await Locatie.create({ naam: 'Zwembad de Viergang', plaats: 'Pijnacker' });
+  const delft = await Locatie.create({ naam: 'Zwembad Kerkpolder', plaats: 'Delft' });
+
+  const zwemlesMaandag = await Activiteit.create({
+    naam: 'Zwemles - maandagavond', locatie: pijnacker._id, weekdag: 'maandag', tijd: '18:30-19:15', soort: 'zwemles',
+  });
+  const aquafitDinsdag = await Activiteit.create({
+    naam: 'Aquafit - dinsdagochtend', locatie: delft._id, weekdag: 'dinsdag', tijd: '09:30-10:15', soort: 'activiteit',
+  });
+
+  // --- Gebruikers ---
+  // Directie: geen locaties (= alle).
+  await maakUser('Directie Demo', 'directie@startblok.nl', ROLES.DIRECTIE);
+  // Coördinator van Pijnacker.
+  const coordinator = await maakUser('Coördinator Demo', 'coordinator@startblok.nl', ROLES.COORDINATOR, {
+    locaties: [pijnacker._id],
+  });
+  // Vrijwilliger ingeschreven op de maandagavond-zwemles (Pijnacker).
+  await maakUser('Vrijwilliger Demo', 'vrijwilliger@startblok.nl', ROLES.VRIJWILLIGER, {
+    activiteiten: [zwemlesMaandag._id],
+  });
 
   // Zelf-aangemelde vrijwilliger die nog op goedkeuring wacht (toont de goedkeur-UI).
   const wachtend = await maakUser('Sanne Wachtend', 'sanne@startblok.nl', ROLES.VRIJWILLIGER);
@@ -41,6 +64,8 @@ async function run() {
     naam: 'Sem de Vries',
     typeBeperking: 'Autisme (ASS)',
     beperkingCategorie: 'gedrag-ontwikkeling',
+    locatie: pijnacker._id,
+    activiteiten: [zwemlesMaandag._id],
     medischeAandachtspunten: [
       { titel: 'Prikkelgevoelig', omschrijving: 'Vermijd plotselinge harde geluiden bij het bad.', urgentie: 'belangrijk' },
     ],
@@ -50,26 +75,28 @@ async function run() {
     niveau: 'Watervrij maken / Badje 1',
     contactNaam: 'Mevr. de Vries',
     contactTelefoon: '06-12345678',
-    laatstGewijzigdDoor: trainer._id,
+    laatstGewijzigdDoor: coordinator._id,
   });
 
   const lisa = await Leerling.create({
     naam: 'Lisa Jansen',
     typeBeperking: 'Spasticiteit (lichamelijk)',
     beperkingCategorie: 'lichamelijk',
+    locatie: delft._id,
+    activiteiten: [aquafitDinsdag._id],
     medischeAandachtspunten: [
       { titel: 'Beperkte beenkracht', omschrijving: 'Heeft drijfmiddel nodig bij benen.', urgentie: 'info' },
     ],
     communicatieTips: 'Spreekt goed, geef haar tijd om te reageren.',
     niveau: 'Zwemslag oefenen',
-    laatstGewijzigdDoor: trainer._id,
+    laatstGewijzigdDoor: coordinator._id,
   });
 
   await Voortgang.insertMany([
-    { leerling: sem._id, onderdeel: 'Gezicht onder water', categorie: 'Watervrij', status: 'behaald', behaaldOp: new Date(), geregistreerdDoor: trainer._id },
-    { leerling: sem._id, onderdeel: 'Drijven op de rug', categorie: 'Watervrij', status: 'in-uitvoering', notitie: 'Durft het bijna zonder steun.', geregistreerdDoor: trainer._id },
-    { leerling: sem._id, onderdeel: 'Watertrappelen 10 sec', categorie: 'Diploma A', status: 'nog-niet-begonnen', geregistreerdDoor: trainer._id },
-    { leerling: lisa._id, onderdeel: 'Schoolslag benen', categorie: 'Diploma A', status: 'in-uitvoering', notitie: 'Met drijfmiddel goed, zonder nog niet.', geregistreerdDoor: trainer._id },
+    { leerling: sem._id, onderdeel: 'Gezicht onder water', categorie: 'Watervrij', status: 'behaald', behaaldOp: new Date(), geregistreerdDoor: coordinator._id },
+    { leerling: sem._id, onderdeel: 'Drijven op de rug', categorie: 'Watervrij', status: 'in-uitvoering', notitie: 'Durft het bijna zonder steun.', geregistreerdDoor: coordinator._id },
+    { leerling: sem._id, onderdeel: 'Watertrappelen 10 sec', categorie: 'Diploma A', status: 'nog-niet-begonnen', geregistreerdDoor: coordinator._id },
+    { leerling: lisa._id, onderdeel: 'Schoolslag benen', categorie: 'Diploma A', status: 'in-uitvoering', notitie: 'Met drijfmiddel goed, zonder nog niet.', geregistreerdDoor: coordinator._id },
   ]);
 
   await KennisbankItem.insertMany(

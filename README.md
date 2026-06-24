@@ -61,11 +61,11 @@ cd client && npm install && npm run dev                                         
 
 ## Testgebruikers (na `npm run seed`)
 
-| Rol         | E-mail                  | Wachtwoord   | Rechten              |
-|-------------|-------------------------|--------------|----------------------|
-| Coördinator | coordinator@startblok.nl| Wachtwoord1! | volledig beheer      |
-| Hoofdtrainer| trainer@startblok.nl    | Wachtwoord1! | lezen + schrijven    |
-| Vrijwilliger| vrijwilliger@startblok.nl| Wachtwoord1!| alleen lezen         |
+| Rol         | E-mail                    | Wachtwoord   | Ziet                                   |
+|-------------|---------------------------|--------------|----------------------------------------|
+| Directie    | directie@startblok.nl     | Wachtwoord1! | alles, alle locaties                   |
+| Coördinator | coordinator@startblok.nl  | Wachtwoord1! | kinderen/activiteiten van eigen locatie (Pijnacker) + goedkeuren |
+| Vrijwilliger| vrijwilliger@startblok.nl | Wachtwoord1! | kinderen van eigen activiteit (maandag-zwemles) |
 
 ## Privacy / AVG
 

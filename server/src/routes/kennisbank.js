@@ -16,7 +16,7 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 // POST /api/kennisbank — toevoegen (schrijven)
-router.post('/', requireRole(ROLES.HOOFDTRAINER), asyncHandler(async (req, res) => {
+router.post('/', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) => {
   const item = await KennisbankItem.create({ ...req.body, aangemaaktDoor: req.user.id });
   res.status(201).json(item);
 }));

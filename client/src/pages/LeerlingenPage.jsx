@@ -21,7 +21,7 @@ export default function LeerlingenPage() {
     <div>
       <div className="kop-rij">
         <h1>Leerlingen</h1>
-        {heeftRol('hoofdtrainer') && (
+        {heeftRol('coordinator') && (
           <Link to="/leerlingen/nieuw" className="knop-link">+ Nieuwe leerling</Link>
         )}
       </div>

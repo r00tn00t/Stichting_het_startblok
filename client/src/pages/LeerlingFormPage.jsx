@@ -21,6 +21,8 @@ const leegFormulier = {
   watWerktWel: '',
   watWerktNiet: '',
   niveau: '',
+  locatie: '',
+  activiteiten: [],
   contactNaam: '',
   contactTelefoon: '',
   medischeAandachtspunten: [],
@@ -34,6 +36,14 @@ export default function LeerlingFormPage() {
   const [form, setForm] = useState(leegFormulier);
   const [fout, setFout] = useState('');
   const [bezig, setBezig] = useState(false);
+  const [locaties, setLocaties] = useState([]);
+  const [activiteiten, setActiviteiten] = useState([]);
+
+  // Locaties + activiteiten ophalen voor de keuzelijsten.
+  useEffect(() => {
+    api('/locaties').then(setLocaties).catch((e) => setFout(e.message));
+    api('/activiteiten').then(setActiviteiten).catch((e) => setFout(e.message));
+  }, []);
 
   // Bij bewerken: bestaand dossier laden.
   useEffect(() => {
@@ -43,6 +53,8 @@ export default function LeerlingFormPage() {
         setForm({
           ...leegFormulier,
           ...leerling,
+          locatie: leerling.locatie || '',
+          activiteiten: leerling.activiteiten || [],
           geboortedatum: leerling.geboortedatum
             ? leerling.geboortedatum.slice(0, 10)
             : '',
@@ -52,6 +64,19 @@ export default function LeerlingFormPage() {
   }, [id, bewerken]);
 
   const set = (veld) => (e) => setForm({ ...form, [veld]: e.target.value });
+
+  // Activiteiten van de gekozen locatie (voor de checkbox-lijst).
+  const activiteitenVanLocatie = activiteiten.filter(
+    (a) => (a.locatie?._id || a.locatie) === form.locatie
+  );
+  const toggleActiviteit = (actId) => (e) => {
+    setForm({
+      ...form,
+      activiteiten: e.target.checked
+        ? [...form.activiteiten, actId]
+        : form.activiteiten.filter((x) => x !== actId),
+    });
+  };
 
   // --- Medische aandachtspunten (subdocumenten) ---
   function voegAandachtspuntToe() {
@@ -151,6 +176,35 @@ export default function LeerlingFormPage() {
               <textarea value={form.watWerktNiet} onChange={set('watWerktNiet')} rows={2} />
             </label>
           </div>
+        </div>
+
+        <div className="card">
+          <h2>Locatie & activiteiten</h2>
+          <p className="muted">Bepaalt wie dit kind kan zien: de coördinator van de locatie en de vrijwilligers van de gekozen activiteit(en).</p>
+          <label>
+            Locatie
+            <select
+              value={form.locatie}
+              onChange={(e) => setForm({ ...form, locatie: e.target.value, activiteiten: [] })}
+            >
+              <option value="">— geen —</option>
+              {locaties.map((l) => <option key={l._id} value={l._id}>{l.naam} ({l.plaats})</option>)}
+            </select>
+          </label>
+          {form.locatie && (
+            <div style={{ marginTop: 12 }}>
+              <strong>Activiteiten</strong>
+              <div className="checkbox-lijst">
+                {activiteitenVanLocatie.map((a) => (
+                  <label key={a._id} className="checkbox-rij">
+                    <input type="checkbox" checked={form.activiteiten.includes(a._id)} onChange={toggleActiviteit(a._id)} />
+                    {a.naam}{a.weekdag ? ` (${a.weekdag})` : ''}
+                  </label>
+                ))}
+                {activiteitenVanLocatie.length === 0 && <span className="muted">Geen activiteiten op deze locatie.</span>}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="card">

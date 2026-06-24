@@ -4,7 +4,7 @@ import { api, setToken, clearToken, getToken } from '../api/client.js';
 const AuthContext = createContext(null);
 
 // Rol-rangorde, spiegelt de backend (config/roles.js).
-const RANK = { vrijwilliger: 1, hoofdtrainer: 2, coordinator: 3 };
+const RANK = { vrijwilliger: 1, coordinator: 2, directie: 3 };
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
