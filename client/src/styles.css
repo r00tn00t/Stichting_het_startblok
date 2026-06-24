@@ -1,0 +1,248 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap");
+
+:root {
+  --color-primary: #006cb7;        /* diep, vriendelijk blauw */
+  --color-primary-light: #008cff;  /* lichter blauw bij hover */
+  --color-accent: #ff7200;         /* levendig oranje */
+  --color-accent-light: #ff8c33;
+  --color-light-bg: #e0f7fa;       /* heel licht blauw */
+  --color-light-blue-gradient: #bbdefb;
+  --color-text-dark: #333;
+  --color-white: #fff;
+  --color-soft-blue: #f0f8ff;      /* zachte kaartachtergrond */
+  --color-soft-warm: #fffaf0;      /* warme accentkaart */
+  --rand: #cfe6f6;
+  --grijs: #5b6b7b;
+  --rood: #d92d20;
+  --font-playful: "Nunito", "Arial Rounded MT Bold", sans-serif;
+}
+
+/* --- Animaties --- */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-active {
+  0% { transform: translateY(-2px) scale(1.04); }
+  50% { transform: translateY(-2px) scale(1.06); }
+  100% { transform: translateY(-2px) scale(1.04); }
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: var(--font-playful);
+  line-height: 1.6;
+  margin: 0;
+  color: var(--color-text-dark);
+  background: linear-gradient(135deg, var(--color-light-bg) 0%, var(--color-light-blue-gradient) 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* --- Topbar (header met golf) --- */
+.topbar {
+  position: relative;
+  display: flex; align-items: center; gap: 24px;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  padding: 0 24px; height: 64px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+/* Speelse golf onderaan de header */
+.topbar::after {
+  content: "";
+  position: absolute; left: 0; bottom: -15px;
+  width: 100%; height: 30px;
+  background: linear-gradient(to right, var(--color-primary), var(--color-accent));
+  border-radius: 50% / 100% 100% 0 0;
+  transform: rotate(180deg);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  z-index: 0;
+}
+.topbar > * { position: relative; z-index: 1; }
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 20px; letter-spacing: 0.3px;
+}
+.brand img { max-height: 40px; width: auto; filter: drop-shadow(1px 1px 2px rgba(0,0,0,.3)); }
+
+.topbar nav { display: flex; gap: 10px; flex: 1; }
+.topbar nav a {
+  color: var(--color-white); text-decoration: none; font-weight: 700;
+  text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;
+  padding: 8px 16px; border-radius: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.12);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.topbar nav a:hover { background-color: var(--color-primary-light); transform: translateY(-2px); }
+.topbar nav a.active {
+  background-color: var(--color-accent);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  animation: pulse-active 1.5s infinite alternate;
+}
+.topbar .user { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.topbar .user button {
+  background: rgba(255, 255, 255, 0.18); color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.content {
+  max-width: 62.5rem; margin: 32px auto; padding: clamp(1rem, 4vw, 2rem);
+  background-color: var(--color-white);
+  border-radius: 1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  animation: fade-in-up 0.5s ease-out;
+}
+
+/* --- Koppen --- */
+h1, h2, h3, h4 { color: var(--color-primary); font-weight: 800; }
+h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); }
+h2 {
+  font-size: 1.6rem; border-bottom: 2px solid var(--color-accent);
+  padding-bottom: 0.3rem; margin-top: 0.5rem;
+}
+h3 { font-size: 1.3rem; color: var(--color-accent); }
+
+/* --- Cards --- */
+.card {
+  background: var(--color-white);
+  border: 3px dashed var(--color-accent);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+  box-shadow: inset 0 0 10px rgba(0, 108, 183, 0.08);
+  animation: fade-in-up 0.5s ease-out;
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.leerling-card {
+  text-decoration: none; color: inherit;
+  border: 2px solid var(--color-light-bg);
+  background-color: var(--color-soft-blue);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.leerling-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 108, 183, 0.25); }
+.leerling-card h3 { margin: 0 0 4px; color: var(--color-primary); }
+
+.muted { color: var(--grijs); font-size: 14px; }
+.badge {
+  display: inline-block; background: var(--color-light-bg); color: var(--color-primary);
+  padding: 3px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  margin-right: 6px; margin-top: 6px;
+}
+.badge.kritiek { background: #fde7e6; color: var(--rood); }
+
+/* --- Knoppen (pill-vorm) --- */
+button, .knop-link {
+  background-color: var(--color-primary); color: var(--color-white);
+  border: none; padding: 0.6rem 1.4rem; cursor: pointer;
+  font-family: inherit; font-size: 0.95rem; font-weight: 700;
+  border-radius: 1.5rem; text-decoration: none; display: inline-block;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+button:hover, .knop-link:hover {
+  background-color: var(--color-primary-light);
+  transform: translateY(-2px); box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.25);
+}
+button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.mini { padding: 0.35rem 0.9rem; font-size: 0.8rem; box-shadow: none; }
+.mini.grijs, button.grijs { background: #eef0f3; color: #344054; box-shadow: none; }
+.mini.grijs:hover, button.grijs:hover { background: #e2e6eb; }
+
+.zoek, .filter-rij select {
+  width: 100%; max-width: 320px; padding: 0.6rem 0.9rem; font-family: inherit;
+  border: 2px solid var(--rand); border-radius: 1.5rem; margin-bottom: 16px;
+}
+.filter-rij { margin: 8px 0 16px; }
+.filter-rij select { max-width: 260px; margin-bottom: 0; }
+
+/* --- Login --- */
+.login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+.login-card { width: 360px; text-align: center; }
+.login-card h1 { margin: 0; color: var(--color-accent); }
+.login-card label { text-align: left; }
+.login-card button { width: 100%; }
+
+.alert { background: #fde7e6; color: var(--rood); padding: 10px 14px; border-radius: 0.5rem; margin: 12px 0; font-weight: 600; }
+.melding { background: #e4f7ec; color: #047857; padding: 10px 14px; border-radius: 0.5rem; margin: 12px 0; font-weight: 600; }
+.terug { color: var(--color-primary); text-decoration: none; font-weight: 700; }
+
+.kop-rij { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+/* --- Definition list --- */
+.dl { display: grid; grid-template-columns: 180px 1fr; gap: 8px 16px; margin: 0; }
+.dl dt { font-weight: 700; color: var(--grijs); }
+.dl dd { margin: 0; }
+
+/* --- Aandachtspunten --- */
+.aandacht { list-style: none; padding: 0; margin: 0; }
+.aandacht li {
+  padding: 10px 14px; border-left: 5px solid var(--grijs);
+  margin-bottom: 8px; background: var(--color-soft-blue); border-radius: 0 8px 8px 0;
+}
+.aandacht li.urgentie-belangrijk { border-color: var(--color-accent); background: var(--color-soft-warm); }
+.aandacht li.urgentie-kritiek { border-color: var(--rood); background: #fef5f4; }
+
+/* --- Tabel / zwemkaart --- */
+.tabel { width: 100%; border-collapse: collapse; }
+.tabel th, .tabel td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--rand); }
+.tabel th { color: var(--color-primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.status { padding: 3px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.status-nog-niet-begonnen { background: #eef0f3; color: var(--grijs); }
+.status-in-uitvoering { background: #fff4e0; color: #b45309; }
+.status-behaald { background: #e4f7ec; color: #047857; }
+tr.inactief { opacity: 0.5; }
+
+/* --- Formulieren --- */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 16px; }
+form label { display: block; font-size: 14px; font-weight: 700; color: var(--grijs); margin-bottom: 4px; }
+form label.vol { display: block; margin-top: 12px; }
+form input, form select, form textarea {
+  width: 100%; padding: 0.6rem 0.8rem; font-family: inherit; font-size: 14px;
+  border: 2px solid var(--rand); border-radius: 0.75rem; margin-top: 4px;
+  background: var(--color-white);
+}
+form input:focus, form select:focus, form textarea:focus {
+  outline: none; border-color: var(--color-primary);
+}
+form textarea { resize: vertical; }
+form button[type="submit"] { margin-top: 16px; }
+
+.aandacht-rij { display: grid; grid-template-columns: 1fr 1.6fr 130px 40px; gap: 8px; margin-bottom: 8px; }
+.aandacht-rij input, .aandacht-rij select { margin-top: 0; }
+
+.nieuw-regel { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+.nieuw-regel input, .nieuw-regel select { margin-top: 0; flex: 1; min-width: 120px; }
+.notitie-input {
+  width: 100%; padding: 5px 10px; border: 2px solid var(--rand);
+  border-radius: 0.5rem; font-size: 13px; font-family: inherit;
+}
+
+/* Checkbox-groepen (inschrijfformulier) */
+.checkbox-lijst { display: grid; gap: 6px; margin: 8px 0; }
+.checkbox-rij {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-weight: 400; color: var(--color-text-dark); font-size: 14px;
+  margin-bottom: 4px; cursor: pointer;
+}
+.checkbox-rij input[type="checkbox"] {
+  width: auto; margin: 3px 0 0; flex-shrink: 0; accent-color: var(--color-primary);
+}
+
+/* Publieke links onder loginformulier */
+.login-links { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; font-size: 14px; }
+.login-links a { color: var(--color-primary); font-weight: 700; text-decoration: none; }
+.login-links a:hover { text-decoration: underline; }
+
+/* --- Responsief --- */
+@media (max-width: 768px) {
+  .topbar { flex-wrap: wrap; height: auto; padding: 12px 16px; gap: 12px; }
+  .topbar nav { order: 3; width: 100%; justify-content: center; }
+  .dl { grid-template-columns: 1fr; }
+  .dl dt { margin-top: 8px; }
+}
+@media (max-width: 480px) {
+  .topbar nav { flex-direction: column; }
+  .topbar nav a { text-align: center; }
+}
