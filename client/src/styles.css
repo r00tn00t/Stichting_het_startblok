@@ -347,6 +347,44 @@ form button[type="submit"] { margin-top: 16px; }
 .exp-legenda-niveau { color: var(--grijs); }
 .exp-chip { padding: 2px 8px; border-radius: 4px; border: 1px solid #b9c6d2; }
 
+/* --- Aanwezigheid --- */
+.aw-telling { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 14px; }
+.aw-chip { padding: 3px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.aw-aanwezig { background: #e4f7ec; color: #047857; }
+.aw-afgemeld { background: #fff4e0; color: #b45309; }
+.aw-afwezig { background: #fde7e6; color: var(--rood); }
+
+.aw-rij { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rand); flex-wrap: wrap; }
+.aw-rij:last-child { border-bottom: none; }
+.aw-naam { font-weight: 600; }
+.aw-knoppen { display: flex; gap: 6px; }
+.aw-btn {
+  background: #eef0f3; color: #344054; border: 2px solid transparent;
+  box-shadow: none; padding: 6px 12px; font-size: 13px; border-radius: 8px;
+}
+.aw-btn:hover { transform: none; }
+.aw-btn.aw-actief.aw-aanwezig { background: #047857; color: #fff; }
+.aw-btn.aw-actief.aw-afgemeld { background: #b45309; color: #fff; }
+.aw-btn.aw-actief.aw-afwezig { background: var(--rood); color: #fff; }
+
+/* Eén-voor-één */
+.aw-een { text-align: center; }
+.aw-een-knoppen { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 16px 0; }
+.aw-btn-groot {
+  background: #eef0f3; color: #344054; border: 2px solid transparent;
+  box-shadow: none; padding: 18px 28px; font-size: 16px; border-radius: 12px; min-width: 130px;
+}
+.aw-btn-groot:hover { transform: translateY(-1px); }
+.aw-btn-groot.aw-actief.aw-aanwezig { background: #047857; color: #fff; }
+.aw-btn-groot.aw-actief.aw-afgemeld { background: #b45309; color: #fff; }
+.aw-btn-groot.aw-actief.aw-afwezig { background: var(--rood); color: #fff; }
+.aw-nav { display: flex; justify-content: space-between; gap: 8px; }
+
+/* Overzicht op leerlingdossier */
+.aw-overzicht { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.aw-percentage { display: flex; flex-direction: column; align-items: center; }
+.aw-percentage-getal { font-size: 2.4rem; font-weight: 800; color: var(--color-primary); line-height: 1; }
+
 /* Tijdens export: verberg alle bewerk-elementen */
 .exporteren .noprint { display: none !important; }
 .exporteren .blok-label, .exporteren .zone-naam { background: transparent; }

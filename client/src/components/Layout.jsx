@@ -30,6 +30,7 @@ export default function Layout() {
           {!heeftRol('coordinator') && <NavLink to="/dashboard"><Icon naam="kalender" />Mijn dag</NavLink>}
           {heeftRol('coordinator') && <NavLink to="/leerlingen"><Icon naam="kind" />Leerlingen</NavLink>}
           {heeftRol('coordinator') && <NavLink to="/badindeling"><Icon naam="water" />Badindeling</NavLink>}
+          {heeftRol('coordinator') && <NavLink to="/aanwezigheid"><Icon naam="check" />Aanwezigheid</NavLink>}
           {heeftRol('coordinator') && <NavLink to="/templates"><Icon naam="sjabloon" />Sjablonen</NavLink>}
           <NavLink to="/kennisbank"><Icon naam="boek" />Kennisbank</NavLink>
           {heeftRol('coordinator') && <NavLink to="/inschrijvingen"><Icon naam="formulier" />Inschrijvingen</NavLink>}

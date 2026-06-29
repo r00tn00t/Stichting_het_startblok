@@ -24,6 +24,7 @@ export default function LeerlingDetailPage() {
   const [nieuw, setNieuw] = useState(leegRegel);
   const [toonNieuw, setToonNieuw] = useState(false);
   const [bewerktNotitie, setBewerktNotitie] = useState({}); // { regelId: tekst }
+  const [aanwezigheid, setAanwezigheid] = useState(null);
 
   const magSchrijven = heeftRol('coordinator');
 
@@ -31,6 +32,9 @@ export default function LeerlingDetailPage() {
     api(`/leerlingen/${id}`).then(setData).catch((e) => setFout(e.message));
   }
   useEffect(laad, [id]);
+  useEffect(() => {
+    api(`/aanwezigheid/leerling/${id}`).then(setAanwezigheid).catch(() => setAanwezigheid(null));
+  }, [id]);
 
   async function wisselStatus(regel) {
     try {
@@ -112,6 +116,42 @@ export default function LeerlingDetailPage() {
           </ul>
         ) : (
           <p className="muted">Geen aandachtspunten vastgelegd.</p>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>Aanwezigheid</h2>
+        {!aanwezigheid || aanwezigheid.totaal === 0 ? (
+          <p className="muted">Nog geen aanwezigheid geregistreerd.</p>
+        ) : (
+          <>
+            <div className="aw-overzicht">
+              <div className="aw-percentage">
+                <span className="aw-percentage-getal">{aanwezigheid.percentage}%</span>
+                <span className="muted">aanwezig</span>
+              </div>
+              <div className="aw-telling">
+                <span className="aw-chip aw-aanwezig">Aanwezig: {aanwezigheid.aanwezig}</span>
+                <span className="aw-chip aw-afgemeld">Afgemeld: {aanwezigheid.afgemeld}</span>
+                <span className="aw-chip aw-afwezig">Afwezig: {aanwezigheid.afwezig}</span>
+                <span className="muted">van {aanwezigheid.totaal} lessen</span>
+              </div>
+            </div>
+            {aanwezigheid.historie?.length > 0 && (
+              <table className="tabel" style={{ marginTop: 12 }}>
+                <thead><tr><th>Datum</th><th>Activiteit</th><th>Status</th></tr></thead>
+                <tbody>
+                  {aanwezigheid.historie.map((h, i) => (
+                    <tr key={i}>
+                      <td>{new Date(h.datum).toLocaleDateString('nl-NL')}</td>
+                      <td className="muted">{h.activiteit}</td>
+                      <td><span className={`aw-chip aw-${h.status}`}>{h.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </>
         )}
       </div>
 
