@@ -317,6 +317,36 @@ form button[type="submit"] { margin-top: 16px; }
 .template-rij { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rand); }
 .template-rij:last-child { border-bottom: none; }
 
+/* --- Export-tabel (zoals papieren Poortugaal-formulier) --- */
+/* Off-screen maar wél gerenderd, zodat html-to-image het kan vastleggen. */
+.export-offscreen { position: absolute; left: -10000px; top: 0; }
+.exp-wrap {
+  background: #fff; padding: 16px; width: 1100px;
+  font-family: var(--font-playful); color: #1a2233;
+}
+.exp-titel { font-weight: 800; font-size: 18px; color: var(--color-primary); margin-bottom: 10px; }
+.exp-titel span { font-weight: 400; color: var(--grijs); }
+.exp-tabel { width: 100%; border-collapse: collapse; margin-bottom: 14px; table-layout: fixed; }
+.exp-tabel th, .exp-tabel td {
+  border: 1px solid #b9c6d2; padding: 4px 6px; font-size: 12px;
+  text-align: left; vertical-align: top; word-break: break-word;
+}
+.exp-tijd { background: #f6a96b; color: #1a2233; font-weight: 800; width: 92px; white-space: nowrap; }
+.exp-zone { background: #fbd2b0; color: #1a2233; font-weight: 700; }
+.exp-rijlabel { background: #fff; width: 92px; border-right: 1px solid #b9c6d2; }
+.exp-vrijwilliger { font-weight: 800; background: #fff7f0; }
+/* Statuskleuren = legenda */
+.exp-nieuw { background: #cdeccd; }
+.exp-oproep { background: #fff3a3; }
+.exp-afwezig { background: #e3e6e9; color: #6b7682; text-decoration: line-through; }
+.exp-verplaatst { background: #cfe8ff; }
+.exp-taxi { background: #ffd9b0; }
+.exp-notities { font-size: 12px; margin: 6px 0 10px; }
+.exp-legenda { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 11px; }
+.exp-legenda-titel { font-weight: 700; }
+.exp-legenda-niveau { color: var(--grijs); }
+.exp-chip { padding: 2px 8px; border-radius: 4px; border: 1px solid #b9c6d2; }
+
 /* Tijdens export: verberg alle bewerk-elementen */
 .exporteren .noprint { display: none !important; }
 .exporteren .blok-label, .exporteren .zone-naam { background: transparent; }

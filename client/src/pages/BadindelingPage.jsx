@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client.js';
 import { exporteerNaarPng, exporteerNaarPdf } from '../utils/exportImage.js';
+import BadindelingExport from '../components/BadindelingExport.jsx';
 
 function vandaagISO() {
   return new Date().toISOString().slice(0, 10);
@@ -58,8 +59,10 @@ export default function BadindelingPage() {
   const [fout, setFout] = useState('');
   const [melding, setMelding] = useState('');
   const roosterRef = useRef(null);
+  const exportRef = useRef(null);
 
   const leerlingNaam = (id) => leerlingen.find((l) => l._id === id)?.naam || '?';
+  const vrijwilligerNaam = (id) => vrijwilligers.find((v) => v._id === id)?.naam || '';
   const activiteitNaam = activiteiten.find((a) => a._id === activiteitId);
 
   useEffect(() => {
@@ -232,21 +235,16 @@ export default function BadindelingPage() {
     } catch (e) { setFout(e.message); }
   }
 
-  // Tijdens export tijdelijk álle blokken tonen (niet alleen het open blok).
-  const [exportAlles, setExportAlles] = useState(false);
+  // Exporteer de speciale tabel-weergave (BadindelingExport) — die toont altijd
+  // alle blokken, los van welk blok in de editor open staat.
   async function exporteer(formaat) {
     setFout('');
-    setExportAlles(true);
-    // Wacht één frame zodat de DOM alle blokken heeft gerenderd.
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     try {
       const naam = `badindeling-${activiteitNaam?.naam || ''}-${datum}`.replace(/[^a-z0-9-]+/gi, '_');
-      if (formaat === 'pdf') await exporteerNaarPdf(roosterRef.current, naam);
-      else await exporteerNaarPng(roosterRef.current, naam);
+      if (formaat === 'pdf') await exporteerNaarPdf(exportRef.current, naam);
+      else await exporteerNaarPng(exportRef.current, naam);
     } catch (e) {
       setFout('Export mislukt: ' + e.message);
-    } finally {
-      setExportAlles(false);
     }
   }
 
@@ -330,12 +328,12 @@ export default function BadindelingPage() {
               </div>
 
               {blokken.map((blok, bi) => {
-                const open = exportAlles || openBlok === bi;
+                const open = openBlok === bi;
                 const aantalKinderen = blok.zones.reduce((n, z) => n + z.kinderen.length, 0);
                 return (
                 <div key={bi} className={`blok ${open ? 'blok-open' : 'blok-dicht'}`}>
                   <div className="blok-kop">
-                    <button type="button" className="blok-toggle noprint" onClick={() => setOpenBlok(open && !exportAlles ? -1 : bi)}>
+                    <button type="button" className="blok-toggle noprint" onClick={() => setOpenBlok(open ? -1 : bi)}>
                       {open ? '▾' : '▸'}
                     </button>
                     <input className="blok-label" value={blok.label} placeholder="bv. 19.00-19.30"
@@ -406,6 +404,21 @@ export default function BadindelingPage() {
               </label>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Off-screen export-weergave (tabel zoals het papieren formulier). */}
+      {activiteitId && (
+        <div className="export-offscreen" aria-hidden="true">
+          <BadindelingExport
+            exportRef={exportRef}
+            titel={`${activiteitNaam?.naam || ''}${activiteitNaam?.locatie?.naam ? ` — ${activiteitNaam.locatie.naam}` : ''}`}
+            datumLabel={new Date(datum).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            blokken={blokken}
+            vrijwilligerNaam={vrijwilligerNaam}
+            leerlingNaam={leerlingNaam}
+            notities={notities}
+          />
         </div>
       )}
     </div>
