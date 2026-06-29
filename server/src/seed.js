@@ -13,6 +13,8 @@ import { Badindeling } from './models/Badindeling.js';
 import { locatieData } from './data/locaties.js';
 import { NIVEAUS } from './data/niveaus.js';
 import { Niveau } from './models/Niveau.js';
+import { Vakantie } from './models/Vakantie.js';
+import { vakantieData } from './data/vakanties.js';
 import { ROLES } from './config/roles.js';
 
 async function maakUser(naam, email, role, extra = {}) {
@@ -36,10 +38,14 @@ async function run() {
     Activiteit.deleteMany({}),
     Badindeling.deleteMany({}),
     Niveau.deleteMany({}),
+    Vakantie.deleteMany({}),
   ]);
 
   // Niveaus (de 12 vaardigheden uit de kennisbank), op volgorde.
   await Niveau.insertMany(NIVEAUS.map((naam, i) => ({ naam, volgorde: i })));
+
+  // Vakanties & feestdagen 2025/2026.
+  await Vakantie.insertMany(vakantieData.map((v) => ({ naam: v.naam, van: new Date(v.van), tot: new Date(v.tot) })));
 
   // --- Locaties + activiteiten (uit data/locaties.js) ---
   const locById = {};   // key -> Locatie-doc

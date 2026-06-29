@@ -361,6 +361,30 @@ form button[type="submit"] { margin-top: 16px; }
 .status-knop { border: none; cursor: pointer; box-shadow: none; }
 .status-knop:hover { filter: brightness(0.95); transform: none; }
 
+/* --- Badindeling weekagenda --- */
+.week-nav { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.week-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.week-dag { background: #fff; border: 1px solid var(--rand); border-radius: 10px; padding: 10px; min-height: 120px; }
+.week-dag-kop { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; border-bottom: 2px solid var(--color-accent); padding-bottom: 4px; }
+.week-dag-naam { font-weight: 800; color: var(--color-primary); text-transform: capitalize; }
+.week-vakantie { background: #f2f4f6; }
+.week-vak-label { color: var(--grijs); font-size: 13px; font-style: italic; }
+.week-les {
+  display: block; width: 100%; text-align: left; margin-bottom: 8px;
+  background: var(--color-soft-blue); color: inherit; border: 1px solid var(--rand);
+  border-radius: 8px; padding: 8px 10px; box-shadow: none;
+}
+.week-les:hover { background: var(--color-light-bg); transform: none; }
+.week-les-naam { display: block; font-weight: 700; font-size: 14px; color: var(--color-primary); }
+.gekleed-badge { background: #fff3a3; color: #7a5c00; font-weight: 700; font-size: 12px; padding: 4px 8px; border-radius: 6px; margin-bottom: 8px; }
+
+@media (max-width: 900px) {
+  .week-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .week-grid { grid-template-columns: 1fr; }
+}
+
 /* --- Niveaus-beheer --- */
 .niveau-rij { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rand); }
 .niveau-rij:last-child { border-bottom: none; }

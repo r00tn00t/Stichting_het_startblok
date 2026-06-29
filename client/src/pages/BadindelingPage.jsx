@@ -7,17 +7,25 @@ function vandaagISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Weekdag-naam (zoals in het Activiteit-model) voor een ISO-datum.
-const WEEKDAGEN = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
-function weekdagVan(iso) {
+// ISO-datum n dagen verschoven.
+function datumPlusDagen(iso, dagen) {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '' : WEEKDAGEN[d.getDay()];
-}
-// ISO-datum n dagen eerder.
-function datumMinusDagen(iso, dagen) {
-  const d = new Date(iso);
-  d.setDate(d.getDate() - dagen);
+  d.setDate(d.getDate() + dagen);
   return d.toISOString().slice(0, 10);
+}
+const datumMinusDagen = (iso, dagen) => datumPlusDagen(iso, -dagen);
+
+// Maandag van de week waarin `iso` valt (ISO-datum).
+function maandagVan(iso) {
+  const d = new Date(iso);
+  const dag = (d.getDay() + 6) % 7; // ma=0 .. zo=6
+  d.setDate(d.getDate() - dag);
+  return d.toISOString().slice(0, 10);
+}
+// Is een datum (ISO) eerste lesdag van de maand voor een activiteit op die weekdag?
+// = geen eerdere datum met dezelfde weekdag in dezelfde maand → dag <= 7.
+function isEersteLesdagVanMaand(iso) {
+  return new Date(iso).getDate() <= 7;
 }
 
 const STATUSSEN = ['aanwezig', 'nieuw', 'oproep', 'afwezig', 'verplaatst', 'taxi'];
@@ -46,6 +54,9 @@ export default function BadindelingPage() {
   const [activiteiten, setActiviteiten] = useState([]);
   const [activiteitId, setActiviteitId] = useState('');
   const [datum, setDatum] = useState(vandaagISO());
+  const [weekStart, setWeekStart] = useState(maandagVan(vandaagISO()));
+  const [vakanties, setVakanties] = useState([]);
+  const [geselecteerd, setGeselecteerd] = useState(false); // is een les open?
 
   const [leerlingen, setLeerlingen] = useState([]);
   const [vrijwilligers, setVrijwilligers] = useState([]);
@@ -68,7 +79,23 @@ export default function BadindelingPage() {
   useEffect(() => {
     api('/activiteiten').then(setActiviteiten).catch((e) => setFout(e.message));
     api('/templates').then(setTemplates).catch(() => {});
+    api('/vakanties').then(setVakanties).catch(() => {});
   }, []);
+
+  // Valt een ISO-datum in een vakantie? Geeft de vakantienaam of null.
+  function vakantieOp(iso) {
+    const t = new Date(iso).getTime();
+    const v = vakanties.find((x) => t >= new Date(x.van).getTime() && t <= new Date(x.tot).getTime());
+    return v ? v.naam : null;
+  }
+
+  // Open een les vanuit de agenda: zet activiteit + datum en toon de editor.
+  function openLes(actId, iso) {
+    setActiviteitId(actId);
+    setDatum(iso);
+    setGeselecteerd(true);
+    setMelding('');
+  }
 
   // Templates van de locatie van de gekozen activiteit.
   const locatieId = activiteitNaam?.locatie?._id || activiteitNaam?.locatie;
@@ -88,14 +115,6 @@ export default function BadindelingPage() {
     setMelding(`Template "${t.naam}" toegepast. Deel in en sla op.`);
   }
 
-  // Activiteit voorselecteren op basis van de weekdag van de datum (alleen als
-  // er nog niets gekozen is, zodat we een handmatige keuze niet overschrijven).
-  useEffect(() => {
-    if (activiteitId || activiteiten.length === 0) return;
-    const wd = weekdagVan(datum);
-    const match = activiteiten.find((a) => a.weekdag === wd);
-    if (match) setActiviteitId(match._id);
-  }, [datum, activiteiten, activiteitId]);
 
   // Kinderen + vrijwilligers van de gekozen activiteit ophalen.
   useEffect(() => {
@@ -248,32 +267,83 @@ export default function BadindelingPage() {
     }
   }
 
+  // --- Weekagenda: lessen per dag (ma-vr) op basis van activiteit.weekdag ---
+  const weekDagen = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag'];
+  const weekDatums = weekDagen.map((_, i) => datumPlusDagen(weekStart, i));
+
+  if (!geselecteerd) {
+    return (
+      <div>
+        <h1>Badindeling — agenda</h1>
+        <p className="muted">Kies een week en klik op een les om de badindeling te maken.</p>
+        {fout && <div className="alert">{fout}</div>}
+
+        <div className="week-nav">
+          <button className="grijs" onClick={() => setWeekStart(datumMinusDagen(weekStart, 7))}>← Vorige week</button>
+          <strong>
+            Week van {new Date(weekStart).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </strong>
+          <button className="grijs" onClick={() => setWeekStart(datumPlusDagen(weekStart, 7))}>Volgende week →</button>
+          <button className="mini grijs" onClick={() => setWeekStart(maandagVan(vandaagISO()))}>Deze week</button>
+        </div>
+
+        <div className="week-grid">
+          {weekDagen.map((dag, i) => {
+            const iso = weekDatums[i];
+            const vak = vakantieOp(iso);
+            const lessen = activiteiten.filter((a) => a.weekdag === dag);
+            const gekleed = isEersteLesdagVanMaand(iso);
+            return (
+              <div key={dag} className={`week-dag ${vak ? 'week-vakantie' : ''}`}>
+                <div className="week-dag-kop">
+                  <span className="week-dag-naam">{dag}</span>
+                  <span className="muted">{new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })}</span>
+                </div>
+                {vak ? (
+                  <div className="week-vak-label">{vak} — geen les</div>
+                ) : lessen.length === 0 ? (
+                  <p className="muted" style={{ fontSize: 13 }}>Geen lessen</p>
+                ) : (
+                  <>
+                    {gekleed && <div className="gekleed-badge">👕 Gekleed zwemmen</div>}
+                    {lessen.map((a) => (
+                      <button key={a._id} className="week-les" onClick={() => openLes(a._id, iso)}>
+                        <span className="week-les-naam">{a.naam}</span>
+                        <span className="muted">{a.locatie?.naam}{a.tijd ? ` · ${a.tijd}` : ''}</span>
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  const gekleedVandaag = isEersteLesdagVanMaand(datum);
+
   return (
     <div>
       <div className="kop-rij">
         <h1>Badindeling</h1>
         <div style={{ display: 'flex', gap: 8 }}>
+          <button className="grijs" onClick={() => setGeselecteerd(false)}>← Agenda</button>
           {blokken.length > 0 && <button className="grijs" onClick={() => exporteer('png')}>📷 Afbeelding</button>}
           {blokken.length > 0 && <button className="grijs" onClick={() => exporteer('pdf')}>📄 PDF</button>}
           {activiteitId && <button onClick={opslaan}>Opslaan</button>}
         </div>
       </div>
-      <p className="muted">Kies activiteit en datum, voeg tijdsblokken en zones toe en sleep kinderen vanuit de lijst naar een zone. Exporteer om te delen in de groepsapp.</p>
+      <p className="muted">
+        {activiteitNaam?.naam}{activiteitNaam?.locatie?.naam ? ` — ${activiteitNaam.locatie.naam}` : ''}
+        {' · '}{new Date(datum).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+      </p>
+      {gekleedVandaag && <div className="melding">👕 Eerste les van de maand — gekleed zwemmen.</div>}
       {fout && <div className="alert">{fout}</div>}
       {melding && <div className="melding">{melding}</div>}
 
       <div className="card">
-        <div className="form-grid">
-          <label>Datum<input type="date" value={datum} onChange={(e) => setDatum(e.target.value)} /></label>
-          <label>Activiteit
-            <select value={activiteitId} onChange={(e) => setActiviteitId(e.target.value)}>
-              <option value="">— kies —</option>
-              {activiteiten.map((a) => (
-                <option key={a._id} value={a._id}>{a.naam}{a.locatie?.naam ? ` — ${a.locatie.naam}` : ''}</option>
-              ))}
-            </select>
-          </label>
-        </div>
         {activiteitId && (
           <>
             <div className="kopieer-rij">
@@ -413,7 +483,7 @@ export default function BadindelingPage() {
           <BadindelingExport
             exportRef={exportRef}
             titel={`${activiteitNaam?.naam || ''}${activiteitNaam?.locatie?.naam ? ` — ${activiteitNaam.locatie.naam}` : ''}`}
-            datumLabel={new Date(datum).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            datumLabel={`${new Date(datum).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}${gekleedVandaag ? ' · GEKLEED ZWEMMEN' : ''}`}
             blokken={blokken}
             vrijwilligerNaam={vrijwilligerNaam}
             leerlingNaam={leerlingNaam}
