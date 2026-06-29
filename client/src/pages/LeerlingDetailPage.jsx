@@ -25,6 +25,7 @@ export default function LeerlingDetailPage() {
   const [toonNieuw, setToonNieuw] = useState(false);
   const [bewerktNotitie, setBewerktNotitie] = useState({}); // { regelId: tekst }
   const [aanwezigheid, setAanwezigheid] = useState(null);
+  const [niveaus, setNiveaus] = useState([]); // [{_id, naam}]
 
   const magSchrijven = heeftRol('coordinator');
 
@@ -34,7 +35,25 @@ export default function LeerlingDetailPage() {
   useEffect(laad, [id]);
   useEffect(() => {
     api(`/aanwezigheid/leerling/${id}`).then(setAanwezigheid).catch(() => setAanwezigheid(null));
+    api('/niveaus').then(setNiveaus).catch(() => setNiveaus([]));
   }, [id]);
+
+  // Status van een vast niveau wisselen. Bestaat er nog geen voortgangsregel voor
+  // dit niveau, dan maken we 'm aan (categorie 'Niveau'); anders doorklikken.
+  async function wisselNiveau(niveauNaam, regel) {
+    try {
+      if (regel) {
+        await api(`/leerlingen/${id}/voortgang/${regel._id}`, {
+          method: 'PUT', body: { status: volgendeStatus[regel.status] },
+        });
+      } else {
+        await api(`/leerlingen/${id}/voortgang`, {
+          method: 'POST', body: { onderdeel: niveauNaam, categorie: 'Niveau', status: 'in-uitvoering' },
+        });
+      }
+      laad();
+    } catch (e) { setFout(e.message); }
+  }
 
   async function wisselStatus(regel) {
     try {
@@ -82,6 +101,12 @@ export default function LeerlingDetailPage() {
 
   const { leerling, voortgang } = data;
   const setNieuwVeld = (veld) => (e) => setNieuw({ ...nieuw, [veld]: e.target.value });
+
+  // Koppel elk niveau aan een bestaande voortgangsregel (op onderdeel-naam).
+  const niveauNamen = new Set(niveaus.map((n) => n.naam));
+  const regelVoorNiveau = (naam) => voortgang.find((v) => v.onderdeel === naam);
+  // Losse onderdelen = voortgang die niet bij een vast niveau hoort.
+  const losseOnderdelen = voortgang.filter((v) => !niveauNamen.has(v.onderdeel));
 
   return (
     <div>
@@ -156,8 +181,39 @@ export default function LeerlingDetailPage() {
       </div>
 
       <div className="card">
+        <h2>Digitale zwemkaart — niveaus</h2>
+        <p className="muted">De vaardigheden uit de kennisbank. {magSchrijven ? 'Klik op de status om door te zetten (nog niet → in uitvoering → behaald).' : ''}</p>
+        <table className="tabel">
+          <thead>
+            <tr><th>Niveau</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {niveaus.map((n, i) => {
+              const regel = regelVoorNiveau(n.naam);
+              const status = regel?.status || 'nog-niet-begonnen';
+              return (
+                <tr key={n._id}>
+                  <td><span className="muted">{i + 1}.</span> {n.naam}</td>
+                  <td>
+                    {magSchrijven ? (
+                      <button className={`status status-${status} status-knop`} onClick={() => wisselNiveau(n.naam, regel)}>
+                        {statusLabel[status]}
+                      </button>
+                    ) : (
+                      <span className={`status status-${status}`}>{statusLabel[status]}</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+            {niveaus.length === 0 && <tr><td colSpan={2} className="muted">Nog geen niveaus ingesteld.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="card">
         <div className="kop-rij">
-          <h2>Digitale zwemkaart</h2>
+          <h2>Overige onderdelen</h2>
           {magSchrijven && (
             <button onClick={() => setToonNieuw((v) => !v)}>
               {toonNieuw ? 'Annuleren' : '+ Onderdeel'}
@@ -184,7 +240,7 @@ export default function LeerlingDetailPage() {
             </tr>
           </thead>
           <tbody>
-            {voortgang.map((v) => (
+            {losseOnderdelen.map((v) => (
               <tr key={v._id}>
                 <td>{v.onderdeel}</td>
                 <td className="muted">{v.categorie}</td>
@@ -207,8 +263,8 @@ export default function LeerlingDetailPage() {
                 )}
               </tr>
             ))}
-            {voortgang.length === 0 && (
-              <tr><td colSpan={magSchrijven ? 5 : 4} className="muted">Nog geen onderdelen.</td></tr>
+            {losseOnderdelen.length === 0 && (
+              <tr><td colSpan={magSchrijven ? 5 : 4} className="muted">Nog geen overige onderdelen.</td></tr>
             )}
           </tbody>
         </table>
