@@ -11,6 +11,8 @@ import { Locatie } from './models/Locatie.js';
 import { Activiteit } from './models/Activiteit.js';
 import { Badindeling } from './models/Badindeling.js';
 import { locatieData } from './data/locaties.js';
+import { NIVEAUS } from './data/niveaus.js';
+import { Niveau } from './models/Niveau.js';
 import { ROLES } from './config/roles.js';
 
 async function maakUser(naam, email, role, extra = {}) {
@@ -33,7 +35,11 @@ async function run() {
     Locatie.deleteMany({}),
     Activiteit.deleteMany({}),
     Badindeling.deleteMany({}),
+    Niveau.deleteMany({}),
   ]);
+
+  // Niveaus (de 12 vaardigheden uit de kennisbank), op volgorde.
+  await Niveau.insertMany(NIVEAUS.map((naam, i) => ({ naam, volgorde: i })));
 
   // --- Locaties + activiteiten (uit data/locaties.js) ---
   const locById = {};   // key -> Locatie-doc

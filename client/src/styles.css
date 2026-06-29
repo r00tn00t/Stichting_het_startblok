@@ -357,6 +357,13 @@ form button[type="submit"] { margin-top: 16px; }
 }
 .beheer-kaart h3 { margin: 0 0 4px; color: var(--color-primary); }
 
+/* --- Niveaus-beheer --- */
+.niveau-rij { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rand); }
+.niveau-rij:last-child { border-bottom: none; }
+.niveau-volg { color: var(--grijs); font-weight: 700; width: 26px; }
+.niveau-naam { flex: 1; font-weight: 600; }
+.niveau-acties { display: flex; gap: 6px; flex-wrap: wrap; }
+
 /* --- Aanwezigheid --- */
 .aw-telling { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 14px; }
 .aw-chip { padding: 3px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }

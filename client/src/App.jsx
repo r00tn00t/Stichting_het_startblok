@@ -15,6 +15,7 @@ import LocatiesPage from './pages/LocatiesPage.jsx';
 import TemplatesPage from './pages/TemplatesPage.jsx';
 import AanwezigheidPage from './pages/AanwezigheidPage.jsx';
 import BeheerPage from './pages/BeheerPage.jsx';
+import NiveausPage from './pages/NiveausPage.jsx';
 import BadindelingPage from './pages/BadindelingPage.jsx';
 import VrijwilligerDashboard from './pages/VrijwilligerDashboard.jsx';
 
@@ -88,6 +89,10 @@ export default function App() {
         <Route
           path="beheer"
           element={<RolVereist minRol="coordinator"><BeheerPage /></RolVereist>}
+        />
+        <Route
+          path="niveaus"
+          element={<RolVereist minRol="coordinator"><NiveausPage /></RolVereist>}
         />
         <Route
           path="gebruikers"

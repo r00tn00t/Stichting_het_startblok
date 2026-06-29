@@ -39,7 +39,8 @@ const leerlingSchema = new mongoose.Schema(
     watWerktWel: { type: String, default: '' },
     watWerktNiet: { type: String, default: '' },
 
-    niveau: { type: String, default: '' },               // huidig zwemniveau / fase
+    niveau: { type: String, default: '' },               // huidige vaardigheid (zie data/niveaus.js)
+    niveauToelichting: { type: String, default: '' },    // vrije toelichting bij het niveau
 
     // Koppeling aan locatie en activiteit(en). Bepaalt wie het kind mag zien:
     // coördinator van de locatie, en vrijwilligers die op dezelfde activiteit zitten.
