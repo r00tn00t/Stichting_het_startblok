@@ -157,6 +157,12 @@ export default function BadindelingPage() {
     (blokken[bi]?.zones || []).forEach((z) => z.kinderen.forEach((k) => set.add(k.leerling)));
     return set;
   }
+  // De tijdsblok-labels waarin een leerling (ergens) is ingedeeld.
+  function blokkenVanLeerling(leerlingId) {
+    return blokken
+      .filter((b) => b.zones.some((z) => z.kinderen.some((k) => k.leerling === leerlingId)))
+      .map((b) => b.label || '?');
+  }
   // 'Nog in te delen' voor het open blok: kinderen die in DIT blok nog nergens staan.
   // (Een kind kan in meerdere blokken zwemmen, dus dit is per blok.)
   const ingedeeldHier = ingedeeldInBlok(openBlok);
@@ -298,11 +304,19 @@ export default function BadindelingPage() {
             <p className="muted" style={{ marginTop: -4, fontSize: 12 }}>
               voor blok: <strong>{blokken[openBlok]?.label || '—'}</strong>
             </p>
-            {nogIndelen.map((l) => (
-              <div key={l._id} className="sleep-kind" draggable onDragStart={(e) => onDragStart(e, l._id)}>
-                {l.naam}
-              </div>
-            ))}
+            {nogIndelen.map((l) => {
+              const andereBlokken = blokkenVanLeerling(l._id);
+              return (
+                <div key={l._id} className="sleep-kind" draggable onDragStart={(e) => onDragStart(e, l._id)}>
+                  <span>{l.naam}</span>
+                  {andereBlokken.length > 0 && (
+                    <span className="kind-blokken" title={`Zwemt al om: ${andereBlokken.join(', ')}`}>
+                      {andereBlokken.map((b) => <span key={b} className="blok-badge">{b}</span>)}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
             {nogIndelen.length === 0 && <p className="muted">Iedereen is ingedeeld in dit blok.</p>}
             <p className="muted hint">Sleep een kind naar een zone. Sleep terug hierheen om uit dit blok te halen.</p>
           </div>
@@ -343,10 +357,19 @@ export default function BadindelingPage() {
                         </select>
 
                         <ul className="zone-kinderen">
-                          {zone.kinderen.map((k, ki) => (
+                          {zone.kinderen.map((k, ki) => {
+                            const andere = blokkenVanLeerling(k.leerling).filter((lbl) => lbl !== blok.label);
+                            return (
                             <li key={ki} className={`kind status-kind-${k.status}`}
                               draggable onDragStart={(e) => onDragStart(e, k.leerling)}>
-                              <span className="kind-naam">{leerlingNaam(k.leerling)}{k.niveau ? ` (${k.niveau})` : ''}</span>
+                              <span className="kind-naam">
+                                {leerlingNaam(k.leerling)}{k.niveau ? ` (${k.niveau})` : ''}
+                                {andere.length > 0 && (
+                                  <span className="kind-blokken noprint" title={`Zwemt ook om: ${andere.join(', ')}`}>
+                                    {andere.map((b) => <span key={b} className="blok-badge">{b}</span>)}
+                                  </span>
+                                )}
+                              </span>
                               <span className="noprint kind-ctrl">
                                 <select value={k.status} onChange={(e) => setKind(bi, zi, ki, 'status', e.target.value)}>
                                   {STATUSSEN.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -357,7 +380,8 @@ export default function BadindelingPage() {
                                 <button className="mini grijs" onClick={() => removeKind(bi, zi, ki)}>✕</button>
                               </span>
                             </li>
-                          ))}
+                            );
+                          })}
                           {zone.kinderen.length === 0 && <li className="zone-leeg noprint">sleep hier een kind</li>}
                         </ul>
                         <button className="mini grijs noprint zone-verwijder" onClick={() => removeZone(bi, zi)}>zone ✕</button>

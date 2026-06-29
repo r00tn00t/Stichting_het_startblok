@@ -283,6 +283,14 @@ form button[type="submit"] { margin-top: 16px; }
   background: var(--color-light-bg); color: var(--color-primary);
   border-radius: 6px; padding: 6px 10px; margin-bottom: 6px;
   font-weight: 600; font-size: 14px; cursor: grab;
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+}
+/* Tijdsblok-badges op een kind-chip: laat zien om welk uur het kind (ook) zwemt. */
+.kind-blokken { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+.blok-badge {
+  background: var(--color-accent); color: #fff;
+  font-size: 10px; font-weight: 800; line-height: 1;
+  padding: 2px 6px; border-radius: 999px; white-space: nowrap;
 }
 .sleep-kind:active { cursor: grabbing; }
 .indeel-lijst .hint { margin-top: 10px; font-size: 12px; }
