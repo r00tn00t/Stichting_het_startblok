@@ -108,10 +108,11 @@ h3 { font-size: 1.3rem; color: var(--color-accent); }
 /* --- Cards --- */
 .card {
   background: var(--color-white);
-  border: 3px dashed var(--color-accent);
+  border: 1px solid var(--rand);
+  border-left: 4px solid var(--color-accent);  /* strakke accentbalk i.p.v. kartelrand */
   border-radius: 0.75rem;
   padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
-  box-shadow: inset 0 0 10px rgba(0, 108, 183, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 60, 110, 0.07);
   animation: fade-in-up 0.5s ease-out;
 }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
@@ -289,7 +290,7 @@ form button[type="submit"] { margin-top: 16px; }
 .kopieer-rij input[type="date"] { margin: 0; padding: 5px 8px; border: 2px solid var(--rand); border-radius: 8px; }
 
 .zone { transition: outline .12s; }
-.zone:hover { outline: 2px dashed var(--color-accent); }
+.zone:hover { outline: 2px solid var(--color-accent); outline-offset: -1px; }
 .kind { cursor: grab; }
 .zone-leeg { list-style: none; color: var(--grijs); font-size: 12px; font-style: italic; padding: 6px; border: 1px dashed var(--rand); border-radius: 6px; text-align: center; }
 
