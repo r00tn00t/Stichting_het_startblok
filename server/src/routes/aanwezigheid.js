@@ -72,6 +72,30 @@ router.put('/', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) =>
   res.json({ ok: true, aantal: ops.length });
 }));
 
+// GET /api/aanwezigheid/samenvatting — percentage per leerling (voor de lijst).
+// Aggregatie: per leerling totaal + aantal aanwezig. Geeft alleen leerlingen
+// met registraties terug ({ leerlingId: { totaal, aanwezig, percentage } }).
+router.get('/samenvatting', asyncHandler(async (_req, res) => {
+  const rijen = await Aanwezigheid.aggregate([
+    {
+      $group: {
+        _id: '$leerling',
+        totaal: { $sum: 1 },
+        aanwezig: { $sum: { $cond: [{ $eq: ['$status', 'aanwezig'] }, 1, 0] } },
+      },
+    },
+  ]);
+  const map = {};
+  for (const r of rijen) {
+    map[r._id.toString()] = {
+      totaal: r.totaal,
+      aanwezig: r.aanwezig,
+      percentage: r.totaal ? Math.round((r.aanwezig / r.totaal) * 100) : null,
+    };
+  }
+  res.json(map);
+}));
+
 // GET /api/aanwezigheid/leerling/:id — statistiek + recente historie van één leerling.
 router.get('/leerling/:id', asyncHandler(async (req, res) => {
   const leerling = await Leerling.findById(req.params.id);

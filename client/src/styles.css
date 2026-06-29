@@ -347,6 +347,16 @@ form button[type="submit"] { margin-top: 16px; }
 .exp-legenda-niveau { color: var(--grijs); }
 .exp-chip { padding: 2px 8px; border-radius: 4px; border: 1px solid #b9c6d2; }
 
+/* --- Beheer-pagina --- */
+.beheer-kaart { text-decoration: none; color: inherit; display: block; transition: transform 0.15s, box-shadow 0.2s; }
+.beheer-kaart:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 108, 183, 0.18); }
+.beheer-icoon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; border-radius: 12px;
+  background: var(--color-light-bg); color: var(--color-primary); margin-bottom: 10px;
+}
+.beheer-kaart h3 { margin: 0 0 4px; color: var(--color-primary); }
+
 /* --- Aanwezigheid --- */
 .aw-telling { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 14px; }
 .aw-chip { padding: 3px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
