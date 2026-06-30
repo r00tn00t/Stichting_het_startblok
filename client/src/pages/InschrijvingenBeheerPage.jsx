@@ -101,7 +101,13 @@ export default function InschrijvingenBeheerPage() {
               <dt>Beperking</dt><dd>{open.beperkingOmschrijving || '—'}</dd>
               <dt>Toevallen</dt><dd>{open.toevallen ? `Ja — ${open.toevallenWaarneming}` : 'Nee'}</dd>
               <dt>Allergieën</dt><dd>{open.allergieen ? `Ja — ${open.allergieenWelke}` : 'Nee'}</dd>
-              <dt>Medicijnen</dt><dd>{open.medicijnen ? `Ja — ${open.medicijnenWelke}` : 'Nee'}</dd>
+              <dt>Medicijnen</dt><dd>{open.medicijnen ? `Ja — ${open.medicijnenWelke || '?'}` : 'Nee'}</dd>
+              {open.medicijnen && open.medicijnenLetOp && (
+                <>
+                  <dt>Let op (medicijnen)</dt>
+                  <dd><strong>Lesgevers rekening houden:</strong> {open.medicijnenInstructie || '—'}</dd>
+                </>
+              )}
               <dt>Fysiotherapie</dt><dd>{open.fysiotherapie ? `Ja — ${open.fysiotherapiePraktijk}` : 'Nee'}</dd>
               <dt>Aandoeningen</dt><dd>{[...(open.aandoeningen || []), open.aandoeningOverig].filter(Boolean).join(', ') || '—'}</dd>
               <dt>Aandachtspunten</dt><dd>{[...(open.aandachtspunten || []), open.aandachtspuntOverig].filter(Boolean).join(', ') || '—'}</dd>

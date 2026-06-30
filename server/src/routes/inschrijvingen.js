@@ -35,7 +35,14 @@ function bouwAandachtspunten(ins) {
     punten.push({ titel: 'Allergieën', omschrijving: ins.allergieenWelke || '', urgentie: 'belangrijk' });
   }
   if (ins.medicijnen) {
-    punten.push({ titel: 'Medicijngebruik', omschrijving: ins.medicijnenWelke || '', urgentie: 'belangrijk' });
+    // Combineer 'welke' + eventuele instructie voor de begeleiders.
+    const delen = [ins.medicijnenWelke, ins.medicijnenInstructie].filter(Boolean);
+    punten.push({
+      titel: 'Medicijngebruik',
+      omschrijving: delen.join(' — ') || '',
+      // Als de lesgevers er rekening mee moeten houden: kritiek, anders belangrijk.
+      urgentie: ins.medicijnenLetOp ? 'kritiek' : 'belangrijk',
+    });
   }
   for (const a of ins.aandoeningen || []) {
     punten.push({ titel: a, omschrijving: '', urgentie: 'info' });

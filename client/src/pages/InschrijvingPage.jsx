@@ -28,7 +28,8 @@ const leeg = {
   gekozenLessen: [], eerderGezwommen: false, eerderToelichting: '',
   beperkingNaam: '', beperkingOmschrijving: '',
   toevallen: false, toevallenWaarneming: '', allergieen: false, allergieenWelke: '',
-  medicijnen: false, medicijnenWelke: '', fysiotherapie: false, fysiotherapiePraktijk: '',
+  medicijnen: false, medicijnenWelke: '', medicijnenLetOp: false, medicijnenInstructie: '',
+  fysiotherapie: false, fysiotherapiePraktijk: '',
   overigeInformatie: '', aandoeningen: [], aandoeningOverig: '',
   aandachtspunten: [], aandachtspuntOverig: '',
   mediaWebsite: false, mediaSocial: false, mediaKrant: false,
@@ -166,6 +167,8 @@ export default function InschrijvingPage() {
 
           <label className="checkbox-rij"><input type="checkbox" checked={form.medicijnen} onChange={setBool('medicijnen')} /> Gebruikt medicijnen</label>
           {form.medicijnen && <label className="vol">Welke?<input value={form.medicijnenWelke} onChange={set('medicijnenWelke')} /></label>}
+          {form.medicijnen && <label className="checkbox-rij"><input type="checkbox" checked={form.medicijnenLetOp} onChange={setBool('medicijnenLetOp')} /> De lesgevers moeten rekening houden met de medicijnen tijdens de les</label>}
+          {form.medicijnen && form.medicijnenLetOp && <label className="vol">Waar moeten de begeleiders op letten? (bv. tijdstip, bijwerkingen, wat te doen)<textarea value={form.medicijnenInstructie} onChange={set('medicijnenInstructie')} rows={2} /></label>}
 
           <label className="checkbox-rij"><input type="checkbox" checked={form.fysiotherapie} onChange={setBool('fysiotherapie')} /> Krijgt fysiotherapie</label>
           {form.fysiotherapie && <label className="vol">Bij welke praktijk?<input value={form.fysiotherapiePraktijk} onChange={set('fysiotherapiePraktijk')} /></label>}

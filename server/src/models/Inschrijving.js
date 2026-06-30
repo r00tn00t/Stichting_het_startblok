@@ -53,6 +53,9 @@ const inschrijvingSchema = new mongoose.Schema(
     allergieenWelke: { type: String, default: '' },
     medicijnen: { type: Boolean, default: false },
     medicijnenWelke: { type: String, default: '' },
+    // Moeten de lesgevers rekening houden met de medicijnen, en zo ja waarmee?
+    medicijnenLetOp: { type: Boolean, default: false },
+    medicijnenInstructie: { type: String, default: '' },
     fysiotherapie: { type: Boolean, default: false },
     fysiotherapiePraktijk: { type: String, default: '' },
     overigeInformatie: { type: String, default: '' },
