@@ -123,6 +123,7 @@ export default function LeerlingDetailPage() {
         <dl className="dl">
           <dt>Type beperking</dt><dd>{leerling.typeBeperking || '—'}</dd>
           <dt>Niveau</dt><dd>{leerling.niveau || '—'}{leerling.niveauToelichting ? ` — ${leerling.niveauToelichting}` : ''}</dd>
+          <dt>Zwemtijd</dt><dd>{leerling.zwemtijd || '—'}</dd>
           <dt>Communicatietips</dt><dd>{leerling.communicatieTips || '—'}</dd>
           <dt>Wat werkt wel</dt><dd>{leerling.watWerktWel || '—'}</dd>
           <dt>Wat werkt niet</dt><dd>{leerling.watWerktNiet || '—'}</dd>

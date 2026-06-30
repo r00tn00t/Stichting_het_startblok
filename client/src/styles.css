@@ -285,6 +285,14 @@ form button[type="submit"] { margin-top: 16px; }
   font-weight: 600; font-size: 14px; cursor: grab;
   display: flex; align-items: center; justify-content: space-between; gap: 6px;
 }
+/* Zwemtijd uit het leerlingprofiel, getoond in de indeellijst. */
+.sleep-kind-naam { display: inline-flex; flex-direction: column; gap: 2px; }
+.zwemtijd-badge {
+  background: var(--color-primary); color: #fff;
+  font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+  align-self: flex-start; white-space: nowrap;
+}
+
 /* Tijdsblok-badges op een kind-chip: laat zien om welk uur het kind (ook) zwemt. */
 .kind-blokken { display: inline-flex; flex-wrap: wrap; gap: 3px; }
 .blok-badge {

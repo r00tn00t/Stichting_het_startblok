@@ -24,6 +24,7 @@ const leegFormulier = {
   niveauToelichting: '',
   locatie: '',
   activiteiten: [],
+  zwemtijd: '',
   contactNaam: '',
   contactTelefoon: '',
   medischeAandachtspunten: [],
@@ -40,13 +41,23 @@ export default function LeerlingFormPage() {
   const [locaties, setLocaties] = useState([]);
   const [activiteiten, setActiviteiten] = useState([]);
   const [niveaus, setNiveaus] = useState([]); // namen van de DB-niveaus
+  const [templates, setTemplates] = useState([]);
 
-  // Locaties + activiteiten + niveaus ophalen voor de keuzelijsten.
+  // Locaties + activiteiten + niveaus + templates ophalen voor de keuzelijsten.
   useEffect(() => {
     api('/locaties').then(setLocaties).catch((e) => setFout(e.message));
     api('/activiteiten').then(setActiviteiten).catch((e) => setFout(e.message));
     api('/niveaus').then((lijst) => setNiveaus(lijst.map((n) => n.naam))).catch(() => {});
+    api('/templates').then(setTemplates).catch(() => {});
   }, []);
+
+  // Tijdslot-opties = de bloklabels uit de templates van de gekozen locatie.
+  const tijdsblokOpties = [...new Set(
+    templates
+      .filter((t) => (t.locatie?._id || t.locatie) === form.locatie)
+      .flatMap((t) => (t.blokken || []).map((b) => b.label))
+      .filter(Boolean)
+  )];
 
   // Bij bewerken: bestaand dossier laden.
   useEffect(() => {
@@ -216,6 +227,20 @@ export default function LeerlingFormPage() {
                 {activiteitenVanLocatie.length === 0 && <span className="muted">Geen activiteiten op deze locatie.</span>}
               </div>
             </div>
+          )}
+          {form.locatie && (
+            <label className="vol">
+              Zwemtijd (tijdslot)
+              <input
+                value={form.zwemtijd}
+                onChange={set('zwemtijd')}
+                list="tijdsblok-opties"
+                placeholder={tijdsblokOpties.length ? 'kies of typ een tijd, bv. 19.00-19.30' : 'bv. 19.00-19.30'}
+              />
+              <datalist id="tijdsblok-opties">
+                {tijdsblokOpties.map((t) => <option key={t} value={t} />)}
+              </datalist>
+            </label>
           )}
         </div>
 

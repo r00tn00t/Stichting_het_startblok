@@ -46,6 +46,9 @@ const leerlingSchema = new mongoose.Schema(
     // coördinator van de locatie, en vrijwilligers die op dezelfde activiteit zitten.
     locatie: { type: mongoose.Schema.Types.ObjectId, ref: 'Locatie', index: true },
     activiteiten: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activiteit' }],
+    // Vast tijdslot waarop het kind zwemt (bv. "19.00-19.30"), gekozen uit de
+    // tijdsblokken van de activiteit/template. Getoond bij het indelen.
+    zwemtijd: { type: String, default: '' },
 
     // Contactpersoon (ouder/verzorger) — minimale dataverzameling.
     contactNaam: { type: String, default: '' },

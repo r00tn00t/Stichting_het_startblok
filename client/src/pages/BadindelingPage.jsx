@@ -376,9 +376,12 @@ export default function BadindelingPage() {
               const andereBlokken = blokkenVanLeerling(l._id);
               return (
                 <div key={l._id} className="sleep-kind" draggable onDragStart={(e) => onDragStart(e, l._id)}>
-                  <span>{l.naam}</span>
+                  <span className="sleep-kind-naam">
+                    {l.naam}
+                    {l.zwemtijd && <span className="zwemtijd-badge" title={`Zwemtijd volgens profiel: ${l.zwemtijd}`}>🕒 {l.zwemtijd}</span>}
+                  </span>
                   {andereBlokken.length > 0 && (
-                    <span className="kind-blokken" title={`Zwemt al om: ${andereBlokken.join(', ')}`}>
+                    <span className="kind-blokken" title={`Al ingedeeld om: ${andereBlokken.join(', ')}`}>
                       {andereBlokken.map((b) => <span key={b} className="blok-badge">{b}</span>)}
                     </span>
                   )}
