@@ -54,6 +54,32 @@ const leerlingSchema = new mongoose.Schema(
     contactNaam: { type: String, default: '' },
     contactTelefoon: { type: String, default: '' },
 
+    // --- Overige gegevens overgenomen uit de inschrijving (volledig dossier) ---
+    voorletters: { type: String, default: '' },
+    geslacht: { type: String, default: '' },
+    straatnaam: { type: String, default: '' },
+    huisnummer: { type: String, default: '' },
+    postcode: { type: String, default: '' },
+    plaats: { type: String, default: '' },
+    email: { type: String, default: '' },
+    dagbestedingSchool: { type: String, default: '' },
+
+    eerderGezwommen: { type: Boolean, default: false },
+    eerderToelichting: { type: String, default: '' },
+
+    beperkingOmschrijving: { type: String, default: '' },
+    fysiotherapie: { type: Boolean, default: false },
+    fysiotherapiePraktijk: { type: String, default: '' },
+    aandachtspunten: [{ type: String }],   // bv. waterangst, concentratieproblemen
+
+    // Media-toestemming (AVG).
+    mediaWebsite: { type: Boolean, default: false },
+    mediaSocial: { type: Boolean, default: false },
+    mediaKrant: { type: Boolean, default: false },
+
+    // Verwijzing naar de oorspronkelijke inschrijving (herkomst).
+    inschrijving: { type: mongoose.Schema.Types.ObjectId, ref: 'Inschrijving' },
+
     actief: { type: Boolean, default: true },
 
     // Audit: wie heeft dit dossier laatst aangepast.

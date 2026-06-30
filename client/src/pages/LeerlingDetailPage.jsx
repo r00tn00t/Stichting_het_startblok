@@ -121,12 +121,37 @@ export default function LeerlingDetailPage() {
       <div className="card">
         <h2>Profiel</h2>
         <dl className="dl">
+          <dt>Geslacht</dt><dd>{leerling.geslacht || '—'}</dd>
+          <dt>Geboortedatum</dt><dd>{leerling.geboortedatum ? new Date(leerling.geboortedatum).toLocaleDateString('nl-NL') : '—'}</dd>
           <dt>Type beperking</dt><dd>{leerling.typeBeperking || '—'}</dd>
+          <dt>Omschrijving beperking</dt><dd>{leerling.beperkingOmschrijving || '—'}</dd>
           <dt>Niveau</dt><dd>{leerling.niveau || '—'}{leerling.niveauToelichting ? ` — ${leerling.niveauToelichting}` : ''}</dd>
           <dt>Zwemtijd</dt><dd>{leerling.zwemtijd || '—'}</dd>
           <dt>Communicatietips</dt><dd>{leerling.communicatieTips || '—'}</dd>
           <dt>Wat werkt wel</dt><dd>{leerling.watWerktWel || '—'}</dd>
           <dt>Wat werkt niet</dt><dd>{leerling.watWerktNiet || '—'}</dd>
+          <dt>Eerder gezwommen</dt><dd>{leerling.eerderGezwommen ? `Ja${leerling.eerderToelichting ? ` — ${leerling.eerderToelichting}` : ''}` : 'Nee'}</dd>
+          <dt>Fysiotherapie</dt><dd>{leerling.fysiotherapie ? `Ja${leerling.fysiotherapiePraktijk ? ` — ${leerling.fysiotherapiePraktijk}` : ''}` : 'Nee'}</dd>
+        </dl>
+      </div>
+
+      <div className="card">
+        <h2>Adres & contact</h2>
+        <dl className="dl">
+          <dt>Adres</dt><dd>{[leerling.straatnaam, leerling.huisnummer].filter(Boolean).join(' ') || '—'}{leerling.postcode || leerling.plaats ? `, ${[leerling.postcode, leerling.plaats].filter(Boolean).join(' ')}` : ''}</dd>
+          <dt>Telefoon</dt><dd>{leerling.contactTelefoon || '—'}</dd>
+          <dt>E-mail</dt><dd>{leerling.email || '—'}</dd>
+          <dt>Contactpersoon</dt><dd>{leerling.contactNaam || '—'}</dd>
+          <dt>Dagbesteding / school</dt><dd>{leerling.dagbestedingSchool || '—'}</dd>
+        </dl>
+      </div>
+
+      <div className="card">
+        <h2>Media-toestemming</h2>
+        <dl className="dl">
+          <dt>Website</dt><dd>{leerling.mediaWebsite ? 'Ja' : 'Nee'}</dd>
+          <dt>Sociale media</dt><dd>{leerling.mediaSocial ? 'Ja' : 'Nee'}</dd>
+          <dt>Krant</dt><dd>{leerling.mediaKrant ? 'Ja' : 'Nee'}</dd>
         </dl>
       </div>
 
@@ -142,6 +167,12 @@ export default function LeerlingDetailPage() {
           </ul>
         ) : (
           <p className="muted">Geen aandachtspunten vastgelegd.</p>
+        )}
+        {leerling.aandachtspunten?.length > 0 && (
+          <p style={{ marginTop: 10 }}>
+            <strong>Aanvullend:</strong>{' '}
+            {leerling.aandachtspunten.map((a) => <span key={a} className="badge">{a}</span>)}
+          </p>
         )}
       </div>
 

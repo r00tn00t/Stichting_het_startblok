@@ -51,16 +51,40 @@ router.post('/:id/goedkeuren', asyncHandler(async (req, res) => {
     return res.status(409).json({ error: 'Deze inschrijving is al goedgekeurd' });
   }
 
+  // Aandachtspunten = aangekruiste lijst + 'overig' (vrije tekst), samengevoegd.
+  const aandachtspunten = [...(ins.aandachtspunten || [])];
+  if (ins.aandachtspuntOverig) aandachtspunten.push(ins.aandachtspuntOverig);
+
   const leerling = await Leerling.create({
     naam: `${ins.roepnaam} ${ins.achternaam}`.trim(),
+    voorletters: ins.voorletters,
+    geslacht: ins.geslacht,
     geboortedatum: ins.geboortedatum,
     typeBeperking: ins.beperkingNaam,
+    beperkingOmschrijving: ins.beperkingOmschrijving,
     medischeAandachtspunten: bouwAandachtspunten(ins),
+    aandachtspunten,
+    fysiotherapie: ins.fysiotherapie,
+    fysiotherapiePraktijk: ins.fysiotherapiePraktijk,
     communicatieTips: '',
     watWerktWel: '',
-    watWerktNiet: '',
+    watWerktNiet: ins.overigeInformatie || '',
+    eerderGezwommen: ins.eerderGezwommen,
+    eerderToelichting: ins.eerderToelichting,
+    // Adres & contact
+    straatnaam: ins.straatnaam,
+    huisnummer: ins.huisnummer,
+    postcode: ins.postcode,
+    plaats: ins.plaats,
+    email: ins.email,
+    dagbestedingSchool: ins.dagbestedingSchool,
     contactNaam: '', // ouder/verzorger; in te vullen door trainer
     contactTelefoon: ins.telefoon,
+    // Media-toestemming
+    mediaWebsite: ins.mediaWebsite,
+    mediaSocial: ins.mediaSocial,
+    mediaKrant: ins.mediaKrant,
+    inschrijving: ins._id,
     laatstGewijzigdDoor: req.user.id,
   });
 
