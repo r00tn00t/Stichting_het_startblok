@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -18,6 +18,7 @@ const leegRegel = { onderdeel: '', categorie: '', status: 'nog-niet-begonnen', n
 
 export default function LeerlingDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { heeftRol } = useAuth();
   const [data, setData] = useState(null);
   const [fout, setFout] = useState('');
@@ -110,7 +111,7 @@ export default function LeerlingDetailPage() {
 
   return (
     <div>
-      <Link to="/leerlingen" className="terug">← Terug</Link>
+      <button onClick={() => navigate(-1)} className="terug terug-knop">← Terug</button>
       <div className="kop-rij">
         <h1>{leerling.naam}</h1>
         {magSchrijven && (

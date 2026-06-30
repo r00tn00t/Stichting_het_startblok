@@ -1,12 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 
 function vandaagISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// Belangrijke opmerkingen: kritieke/belangrijke medische punten, anders tips.
+function opmerkingen(l) {
+  const punten = (l.medischeAandachtspunten || [])
+    .filter((a) => a.urgentie === 'kritiek' || a.urgentie === 'belangrijk')
+    .map((a) => a.titel);
+  if (punten.length) return punten.join(', ');
+  return l.communicatieTips || '—';
+}
+const heeftKritiek = (l) => (l.medischeAandachtspunten || []).some((a) => a.urgentie === 'kritiek');
+
 export default function VrijwilligerDashboard() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState('vandaag');
   const [datum, setDatum] = useState(vandaagISO());
   const [vandaag, setVandaag] = useState([]);      // [{ activiteit, kinderen[] }]
@@ -46,38 +57,60 @@ export default function VrijwilligerDashboard() {
             <p className="muted">Je hebt vandaag nog geen kinderen toegewezen gekregen. Vraag je coördinator om de badindeling.</p>
           )}
           {vandaag.map((groep, i) => (
-            <div key={i} className="card">
+            <div key={i} className="card" style={{ overflowX: 'auto' }}>
               <h3>
                 {groep.activiteit?.naam || 'Activiteit'}
-                <span className="muted"> · {groep.blok} · {groep.zone}</span>
+                <span className="muted"> · {groep.blok} · zone {groep.zone}</span>
               </h3>
-              <div className="grid">
-                {groep.kinderen.map((k) => {
-                  const l = k.leerling || {};
-                  return (
-                    <Link key={l._id} to={`/leerlingen/${l._id}`} className={`card leerling-card status-kind-${k.status}`}>
-                      <h3>{l.naam}{k.niveau ? ` (${k.niveau})` : ''}</h3>
-                      <p className="muted">{l.typeBeperking || '—'}</p>
-                      {k.status !== 'aanwezig' && <span className="badge">{k.status}</span>}
-                    </Link>
-                  );
-                })}
-              </div>
+              <table className="tabel leerlingen-tabel">
+                <thead>
+                  <tr><th>Naam</th><th>Beperking</th><th>Niveau</th><th>Status</th><th>Belangrijke opmerkingen</th></tr>
+                </thead>
+                <tbody>
+                  {groep.kinderen.map((k) => {
+                    const l = k.leerling || {};
+                    return (
+                      <tr key={l._id} className="leerling-rij" onClick={() => navigate(`/leerlingen/${l._id}`)}>
+                        <td><strong>{l.naam}</strong></td>
+                        <td className="muted">{l.typeBeperking || '—'}</td>
+                        <td>{k.niveau || l.niveau ? <span className="badge">{k.niveau || l.niveau}</span> : '—'}</td>
+                        <td>{k.status !== 'aanwezig' ? <span className={`aw-chip status-kind-${k.status}`}>{k.status}</span> : <span className="muted">aanwezig</span>}</td>
+                        <td className="opmerkingen-cel">
+                          {heeftKritiek(l) && <span className="badge kritiek">⚠ Kritiek</span>}
+                          {opmerkingen(l)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           ))}
         </div>
       )}
 
       {tab === 'deelnemers' && (
-        <div className="grid">
-          {deelnemers.map((l) => (
-            <Link key={l._id} to={`/leerlingen/${l._id}`} className="card leerling-card">
-              <h3>{l.naam}</h3>
-              <p className="muted">{l.typeBeperking || '—'}</p>
-              {l.niveau && <span className="badge">{l.niveau}</span>}
-            </Link>
-          ))}
-          {deelnemers.length === 0 && <p className="muted">Geen deelnemers gevonden.</p>}
+        <div className="card" style={{ overflowX: 'auto' }}>
+          <table className="tabel leerlingen-tabel">
+            <thead>
+              <tr><th>Naam</th><th>Beperking</th><th>Niveau</th><th>Zwemtijd</th><th>Belangrijke opmerkingen</th></tr>
+            </thead>
+            <tbody>
+              {deelnemers.map((l) => (
+                <tr key={l._id} className="leerling-rij" onClick={() => navigate(`/leerlingen/${l._id}`)}>
+                  <td><strong>{l.naam}</strong></td>
+                  <td className="muted">{l.typeBeperking || '—'}</td>
+                  <td>{l.niveau ? <span className="badge">{l.niveau}</span> : '—'}</td>
+                  <td className="muted">{l.zwemtijd || '—'}</td>
+                  <td className="opmerkingen-cel">
+                    {heeftKritiek(l) && <span className="badge kritiek">⚠ Kritiek</span>}
+                    {opmerkingen(l)}
+                  </td>
+                </tr>
+              ))}
+              {deelnemers.length === 0 && <tr><td colSpan={5} className="muted">Geen deelnemers gevonden.</td></tr>}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

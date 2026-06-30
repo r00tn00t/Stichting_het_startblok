@@ -90,9 +90,11 @@ router.get('/mijn', asyncHandler(async (req, res) => {
   if (!dag) return res.status(400).json({ error: 'Ongeldige datum' });
   const dagEinde = new Date(dag.getTime() + 24 * 60 * 60 * 1000);
 
-  const indelingen = await populeer(
-    Badindeling.find({ datum: { $gte: dag, $lt: dagEinde } }).populate('activiteit', 'naam weekdag tijd')
-  );
+  // Voor 'mijn dag' tonen we ook de belangrijke opmerkingen, dus extra velden.
+  const indelingen = await Badindeling.find({ datum: { $gte: dag, $lt: dagEinde } })
+    .populate('activiteit', 'naam weekdag tijd')
+    .populate('blokken.zones.vrijwilliger', 'naam')
+    .populate('blokken.zones.kinderen.leerling', 'naam typeBeperking niveau zwemtijd communicatieTips medischeAandachtspunten');
 
   const resultaat = [];
   for (const ind of indelingen) {

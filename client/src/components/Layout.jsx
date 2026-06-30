@@ -4,7 +4,7 @@ import Icon from './Icon.jsx';
 
 // Pagina's die de volle schermbreedte gebruiken (breed rooster e.d.).
 const BREDE_PADEN = ['/badindeling']; // ook subpaden
-const BREDE_PADEN_EXACT = ['/leerlingen']; // alleen de lijst, niet detail/bewerken
+const BREDE_PADEN_EXACT = ['/leerlingen', '/dashboard']; // alleen de lijst, niet detail/bewerken
 
 const rolLabel = {
   vrijwilliger: 'Vrijwilliger',

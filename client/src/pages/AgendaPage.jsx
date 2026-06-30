@@ -19,13 +19,28 @@ export default function AgendaPage() {
   const [afspraken, setAfspraken] = useState([]);
   const [weekStart, setWeekStart] = useState(maandagVan(vandaagISO()));
   const [gekozen, setGekozen] = useState(null); // { type:'les'|'afspraak', ... }
+  const [mijnKinderen, setMijnKinderen] = useState(null); // eigen toewijzing voor gekozen les
   const [fout, setFout] = useState('');
+
+  const isVrijwilliger = !heeftRol('coordinator');
 
   useEffect(() => {
     api('/activiteiten').then(setActiviteiten).catch((e) => setFout(e.message));
     api('/vakanties').then(setVakanties).catch(() => {});
     api('/afspraken').then(setAfspraken).catch(() => {});
   }, []);
+
+  // Eigen kinderen ophalen wanneer een vrijwilliger een les selecteert.
+  useEffect(() => {
+    setMijnKinderen(null);
+    if (!isVrijwilliger || gekozen?.type !== 'les') return;
+    api(`/badindelingen/mijn?datum=${gekozen.datum}`)
+      .then((groepen) => {
+        const eigen = groepen.filter((g) => g.activiteit?._id === gekozen.activiteit._id);
+        setMijnKinderen(eigen);
+      })
+      .catch(() => setMijnKinderen([]));
+  }, [gekozen, isVrijwilliger]);
 
   // Losse afspraken op een ISO-datum.
   const afsprakenOp = (iso) => afspraken.filter((a) => isoVan(new Date(a.datum)) === iso);
@@ -161,6 +176,30 @@ export default function AgendaPage() {
               </dl>
               {heeftRol('coordinator') && (
                 <Link to="/badindeling" className="knop-link" style={{ marginTop: 12 }}>Naar badindeling</Link>
+              )}
+              {isVrijwilliger && (
+                <div style={{ marginTop: 14 }}>
+                  <h3 style={{ fontSize: '1rem' }}>Mijn kinderen deze les</h3>
+                  {mijnKinderen === null ? (
+                    <p className="muted">Laden…</p>
+                  ) : mijnKinderen.length === 0 ? (
+                    <p className="muted">Je bent (nog) niet ingedeeld voor deze les.</p>
+                  ) : (
+                    mijnKinderen.map((g, i) => (
+                      <div key={i} style={{ marginBottom: 8 }}>
+                        <p className="muted" style={{ margin: '4px 0' }}>{g.blok} · zone {g.zone}</p>
+                        <ul className="aandacht" style={{ margin: 0 }}>
+                          {g.kinderen.map((k) => (
+                            <li key={k.leerling?._id}>
+                              <Link to={`/leerlingen/${k.leerling?._id}`}>{k.leerling?.naam}</Link>
+                              {k.niveau ? ` (${k.niveau})` : ''}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))
+                  )}
+                </div>
               )}
             </>
           )}
