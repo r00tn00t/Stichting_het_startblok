@@ -1,0 +1,636 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap");
+
+:root {
+  --color-primary: #006cb7;        /* diep, vriendelijk blauw */
+  --color-primary-light: #008cff;  /* lichter blauw bij hover */
+  --color-accent: #ff7200;         /* levendig oranje */
+  --color-accent-light: #ff8c33;
+  --color-light-bg: #e0f7fa;       /* heel licht blauw */
+  --color-light-blue-gradient: #bbdefb;
+  --color-text-dark: #333;
+  --color-white: #fff;
+  --color-soft-blue: #f0f8ff;      /* zachte kaartachtergrond */
+  --color-soft-warm: #fffaf0;      /* warme accentkaart */
+  --rand: #cfe6f6;
+  --grijs: #5b6b7b;
+  --rood: #d92d20;
+  --font-playful: "Nunito", "Arial Rounded MT Bold", sans-serif;
+}
+
+/* --- Animaties --- */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+* { box-sizing: border-box; }
+body {
+  font-family: var(--font-playful);
+  line-height: 1.6;
+  margin: 0;
+  color: var(--color-text-dark);
+  background: linear-gradient(135deg, var(--color-light-bg) 0%, var(--color-light-blue-gradient) 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* --- Topbar --- */
+.topbar {
+  position: relative;
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  background: linear-gradient(90deg, var(--color-primary) 0%, #0a82d6 100%);
+  color: var(--color-white);
+  padding: 16px 32px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+}
+/* Dunne, levendige accentlijn onderaan de header (rustig, geen poespas). */
+.topbar::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 5px;
+  background: linear-gradient(to right, var(--color-accent), var(--color-accent-light));
+}
+.brand {
+  display: flex; align-items: center; gap: 12px;
+  font-weight: 800; font-size: 24px; letter-spacing: 0.3px;
+}
+.brand img { max-height: 48px; width: auto; }
+
+.topbar nav { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }
+.topbar nav a {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: rgba(255, 255, 255, 0.88); text-decoration: none; font-weight: 700;
+  font-size: 15.5px; padding: 11px 18px; border-radius: 12px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.topbar nav a .ico { width: 20px; height: 20px; flex-shrink: 0; }
+.topbar nav a:hover { background-color: rgba(255, 255, 255, 0.16); color: #fff; }
+.topbar nav a.active { background-color: var(--color-white); color: var(--color-primary); }
+
+.topbar .user { display: flex; align-items: center; gap: 14px; }
+.user-info { display: flex; flex-direction: column; line-height: 1.2; text-align: right; }
+.user-naam { font-weight: 700; font-size: 15px; }
+.user-rol {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
+  color: var(--color-white); background: var(--color-accent);
+  border-radius: 999px; padding: 2px 9px; align-self: flex-end; margin-top: 3px;
+}
+.topbar .user button {
+  background: rgba(255, 255, 255, 0.16); color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.45); box-shadow: none;
+  padding: 9px 16px; font-size: 14px;
+}
+.topbar .user button:hover { background: rgba(255, 255, 255, 0.28); transform: none; }
+
+/* Hamburger + in-nav gebruiker zijn standaard verborgen (desktop). */
+.menu-knop { display: none; }
+.nav-gebruiker { display: none; }
+
+@media (max-width: 860px) {
+  .topbar { gap: 12px; padding: 12px 16px; flex-wrap: nowrap; }
+  .brand { flex: 1; font-size: 19px; }
+
+  /* Hamburger tonen, desktop-gebruikersblok verbergen. */
+  .menu-knop {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 42px; height: 42px; font-size: 22px; line-height: 1;
+    background: rgba(255, 255, 255, 0.16); color: #fff;
+    border: none; border-radius: 10px; box-shadow: none; padding: 0;
+  }
+  .topbar .user { display: none; }
+
+  /* Nav wordt een uitklapbaar paneel onder de balk: gewone full-width blok
+     binnen de topbar-padding (geen negatieve marges → valt nooit buiten beeld). */
+  .topbar nav {
+    order: 3; width: 100%; box-sizing: border-box;
+    display: none; flex-direction: column; gap: 6px;
+    margin: 10px 0 0; padding: 10px;
+    background: rgba(0, 0, 0, 0.12); border-radius: 12px;
+  }
+  .topbar nav.nav-open { display: flex; }
+  .topbar nav a {
+    font-size: 16px; padding: 12px 14px; border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .topbar nav a .ico { width: 22px; height: 22px; }
+
+  /* Gebruiker + uitloggen onderaan het uitklapmenu. */
+  .nav-gebruiker {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-top: 8px; padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .nav-gebruiker .muted { color: rgba(255, 255, 255, 0.85); font-size: 13px; }
+  .nav-gebruiker button { background: rgba(255, 255, 255, 0.16); color: #fff; border: 1px solid rgba(255, 255, 255, 0.4); }
+}
+
+.content {
+  max-width: 62.5rem; margin: 32px auto; padding: clamp(1rem, 4vw, 2rem);
+  background-color: var(--color-white);
+  border-radius: 1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  animation: fade-in-up 0.5s ease-out;
+}
+/* Brede pagina's (badindeling): vrijwel volledige schermbreedte. */
+.content-breed { max-width: none; margin: 24px clamp(12px, 2vw, 28px); }
+
+/* --- Koppen --- */
+h1, h2, h3, h4 { color: var(--color-primary); font-weight: 800; }
+h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); }
+h2 {
+  font-size: 1.6rem; border-bottom: 2px solid var(--color-accent);
+  padding-bottom: 0.3rem; margin-top: 0.5rem;
+}
+h3 { font-size: 1.3rem; color: var(--color-accent); }
+
+/* Kaart met rode accentbalk voor kritieke info (bv. medicijnen-let-op). */
+.card-kritiek { border-left-color: var(--rood); }
+
+/* --- Cards --- */
+.card {
+  background: var(--color-white);
+  border: 1px solid var(--rand);
+  border-left: 4px solid var(--color-accent);  /* strakke accentbalk i.p.v. kartelrand */
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 60, 110, 0.07);
+  animation: fade-in-up 0.5s ease-out;
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.leerling-card {
+  text-decoration: none; color: inherit;
+  border: 2px solid var(--color-light-bg);
+  background-color: var(--color-soft-blue);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.leerling-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 108, 183, 0.25); }
+.leerling-card h3 { margin: 0 0 4px; color: var(--color-primary); }
+
+.muted { color: var(--grijs); font-size: 14px; }
+.badge {
+  display: inline-block; background: var(--color-light-bg); color: var(--color-primary);
+  padding: 3px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  margin-right: 6px; margin-top: 6px;
+}
+.badge.kritiek { background: #fde7e6; color: var(--rood); }
+
+/* --- Knoppen (pill-vorm) --- */
+button, .knop-link {
+  background-color: var(--color-primary); color: var(--color-white);
+  border: none; padding: 0.6rem 1.4rem; cursor: pointer;
+  font-family: inherit; font-size: 0.95rem; font-weight: 700;
+  border-radius: 1.5rem; text-decoration: none; display: inline-block;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+button:hover, .knop-link:hover {
+  background-color: var(--color-primary-light);
+  transform: translateY(-2px); box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.25);
+}
+button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.mini { padding: 0.35rem 0.9rem; font-size: 0.8rem; box-shadow: none; }
+.mini.grijs, button.grijs { background: #eef0f3; color: #344054; box-shadow: none; }
+.mini.grijs:hover, button.grijs:hover { background: #e2e6eb; }
+
+.zoek, .filter-rij select {
+  width: 100%; max-width: 320px; padding: 0.6rem 0.9rem; font-family: inherit;
+  border: 2px solid var(--rand); border-radius: 1.5rem; margin-bottom: 16px;
+}
+.filter-rij { margin: 8px 0 16px; }
+.filter-rij select { max-width: 260px; margin-bottom: 0; }
+
+/* --- Login --- */
+.login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+.login-card { width: 360px; text-align: center; }
+.login-card h1 { margin: 0; color: var(--color-accent); }
+.login-card label { text-align: left; }
+.login-card button { width: 100%; }
+
+.alert { background: #fde7e6; color: var(--rood); padding: 10px 14px; border-radius: 0.5rem; margin: 12px 0; font-weight: 600; }
+.melding { background: #e4f7ec; color: #047857; padding: 10px 14px; border-radius: 0.5rem; margin: 12px 0; font-weight: 600; }
+.terug { color: var(--color-primary); text-decoration: none; font-weight: 700; }
+
+.kop-rij { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+/* --- Definition list --- */
+.dl { display: grid; grid-template-columns: 180px 1fr; gap: 8px 16px; margin: 0; }
+.dl dt { font-weight: 700; color: var(--grijs); }
+.dl dd { margin: 0; }
+
+/* --- Aandachtspunten --- */
+.aandacht { list-style: none; padding: 0; margin: 0; }
+.aandacht li {
+  padding: 10px 14px; border-left: 5px solid var(--grijs);
+  margin-bottom: 8px; background: var(--color-soft-blue); border-radius: 0 8px 8px 0;
+}
+.aandacht li.urgentie-belangrijk { border-color: var(--color-accent); background: var(--color-soft-warm); }
+.aandacht li.urgentie-kritiek { border-color: var(--rood); background: #fef5f4; }
+
+/* --- Tabel / zwemkaart --- */
+.tabel { width: 100%; border-collapse: collapse; }
+.tabel th, .tabel td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--rand); }
+.tabel th { color: var(--color-primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.status { padding: 3px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.status-nog-niet-begonnen { background: #eef0f3; color: var(--grijs); }
+.status-in-uitvoering { background: #fff4e0; color: #b45309; }
+.status-behaald { background: #e4f7ec; color: #047857; }
+tr.inactief { opacity: 0.5; }
+
+/* --- Formulieren --- */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 16px; }
+form label { display: block; font-size: 14px; font-weight: 700; color: var(--grijs); margin-bottom: 4px; }
+form label.vol { display: block; margin-top: 12px; }
+form input, form select, form textarea {
+  width: 100%; padding: 0.6rem 0.8rem; font-family: inherit; font-size: 14px;
+  border: 2px solid var(--rand); border-radius: 0.75rem; margin-top: 4px;
+  background: var(--color-white);
+}
+form input:focus, form select:focus, form textarea:focus {
+  outline: none; border-color: var(--color-primary);
+}
+form textarea { resize: vertical; }
+form button[type="submit"] { margin-top: 16px; }
+
+.aandacht-rij { display: grid; grid-template-columns: 1fr 1.6fr 130px 40px; gap: 8px; margin-bottom: 8px; }
+.aandacht-rij input, .aandacht-rij select { margin-top: 0; }
+
+.nieuw-regel { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+.nieuw-regel input, .nieuw-regel select { margin-top: 0; flex: 1; min-width: 120px; }
+.notitie-input {
+  width: 100%; padding: 5px 10px; border: 2px solid var(--rand);
+  border-radius: 0.5rem; font-size: 13px; font-family: inherit;
+}
+
+/* Checkbox-groepen (inschrijfformulier) */
+.checkbox-lijst { display: grid; gap: 6px; margin: 8px 0; }
+.checkbox-rij {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-weight: 400; color: var(--color-text-dark); font-size: 14px;
+  margin-bottom: 4px; cursor: pointer;
+}
+.checkbox-rij input[type="checkbox"] {
+  width: auto; margin: 3px 0 0; flex-shrink: 0; accent-color: var(--color-primary);
+}
+
+/* --- Badindeling rooster --- */
+.rooster-export { background: #fff; border-radius: 12px; padding: 16px; }
+.rooster-titel { font-weight: 800; color: var(--color-primary); font-size: 1.1rem; margin-bottom: 12px; }
+.rooster-titel span { font-weight: 400; color: var(--grijs); }
+
+.blok { border: 2px solid var(--rand); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+.blok-kop { display: flex; align-items: center; gap: 8px; background: var(--color-accent); padding: 6px 10px; }
+.blok-label { font-weight: 800; border: none; background: rgba(255,255,255,.85); border-radius: 6px; padding: 4px 8px; flex: 1; max-width: 220px; margin: 0; }
+.blok-toggle {
+  background: rgba(255,255,255,.3); color: #fff; border: none; box-shadow: none;
+  width: 28px; height: 28px; padding: 0; border-radius: 6px; font-size: 14px; line-height: 1;
+}
+.blok-toggle:hover { background: rgba(255,255,255,.45); transform: none; }
+.blok-telling { color: #fff; font-size: 12px; font-weight: 700; margin-left: auto; opacity: .9; }
+.blok-dicht { opacity: .92; }
+.blok-dicht .blok-telling { margin-left: auto; }
+
+.zones { display: flex; gap: 8px; padding: 10px; overflow-x: auto; align-items: flex-start; }
+.zone { flex: 0 0 180px; border: 1px solid var(--rand); border-radius: 8px; padding: 8px; background: var(--color-soft-blue); }
+.zone-naam { font-weight: 700; width: 100%; border: none; background: var(--color-light-bg); border-radius: 6px; padding: 3px 6px; margin: 0 0 6px; }
+.zone-vrijwilliger { width: 100%; margin: 0 0 8px; font-weight: 700; }
+
+.zone-kinderen { list-style: none; padding: 0; margin: 0; }
+.kind { background: #fff; border-radius: 6px; padding: 4px 6px; margin-bottom: 4px; font-size: 13px; }
+.kind-naam { font-weight: 600; }
+.kind-ctrl { display: flex; gap: 4px; margin-top: 4px; }
+.kind-ctrl select { font-size: 11px; padding: 2px; margin: 0; flex: 1; }
+.kind-toevoegen { width: 100%; margin-top: 6px; font-size: 12px; }
+.zone-verwijder { width: 100%; margin-top: 6px; }
+
+/* Statuskleuren (legenda) */
+.status-kind-nieuw { background: #d6f5d6; }
+.status-kind-oproep { background: #fff3bf; }
+.status-kind-afwezig, .status-kind-verplaatst { background: #e9ecef; color: var(--grijs); text-decoration: line-through; }
+.status-kind-taxi { background: #ffe8cc; }
+
+.rooster-notities { margin-top: 10px; font-size: 14px; }
+.rooster-legenda { margin-top: 8px; font-size: 12px; color: var(--grijs); }
+
+/* Werkblad: lijst links, rooster rechts */
+.badindeling-werkblad { display: flex; gap: 16px; align-items: flex-start; }
+.badindeling-rooster { flex: 1; min-width: 0; }
+.indeel-lijst {
+  flex: 0 0 200px; background: #fff; border: 2px solid var(--rand);
+  border-radius: 10px; padding: 12px; position: sticky; top: 12px;
+}
+.indeel-lijst h3 { margin: 0 0 8px; font-size: 1rem; }
+.sleep-kind {
+  background: var(--color-light-bg); color: var(--color-primary);
+  border-radius: 6px; padding: 6px 10px; margin-bottom: 6px;
+  font-weight: 600; font-size: 14px; cursor: grab;
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+}
+/* Zwemtijd uit het leerlingprofiel, getoond in de indeellijst. */
+.sleep-kind-naam { display: inline-flex; flex-direction: column; gap: 2px; }
+.zwemtijd-badge {
+  background: var(--color-primary); color: #fff;
+  font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+  align-self: flex-start; white-space: nowrap;
+}
+
+/* Tijdsblok-badges op een kind-chip: laat zien om welk uur het kind (ook) zwemt. */
+.kind-blokken { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+.blok-badge {
+  background: var(--color-accent); color: #fff;
+  font-size: 10px; font-weight: 800; line-height: 1;
+  padding: 2px 6px; border-radius: 999px; white-space: nowrap;
+}
+.sleep-kind:active { cursor: grabbing; }
+.indeel-lijst .hint { margin-top: 10px; font-size: 12px; }
+.kopieer-rij { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.kopieer-rij input[type="date"] { margin: 0; padding: 5px 8px; border: 2px solid var(--rand); border-radius: 8px; }
+
+.zone { transition: outline .12s; }
+.zone:hover { outline: 2px solid var(--color-accent); outline-offset: -1px; }
+.kind { cursor: grab; }
+.zone-leeg { list-style: none; color: var(--grijs); font-size: 12px; font-style: italic; padding: 6px; border: 1px dashed var(--rand); border-radius: 6px; text-align: center; }
+
+@media (max-width: 700px) {
+  .badindeling-werkblad { flex-direction: column; }
+  .indeel-lijst { position: static; width: 100%; flex-basis: auto; }
+}
+
+/* Template-editor */
+.template-blok { border: 1px solid var(--rand); border-radius: 8px; padding: 10px; margin-top: 10px; background: var(--color-soft-blue); }
+.template-blok-kop { display: flex; gap: 8px; margin-bottom: 8px; }
+.template-blok-kop input { font-weight: 700; flex: 1; max-width: 280px; margin: 0; }
+.template-zones { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.template-zone { display: inline-flex; align-items: center; gap: 4px; }
+.template-zone input { width: 130px; margin: 0; }
+.template-rij { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rand); }
+.template-rij:last-child { border-bottom: none; }
+
+/* --- Export-tabel (zoals papieren Poortugaal-formulier) --- */
+/* Off-screen maar wél gerenderd, zodat html-to-image het kan vastleggen. */
+.export-offscreen { position: absolute; left: -10000px; top: 0; }
+.exp-wrap {
+  background: #fff; padding: 16px; width: 1100px;
+  font-family: var(--font-playful); color: #1a2233;
+}
+.exp-titel { font-weight: 800; font-size: 18px; color: var(--color-primary); margin-bottom: 10px; }
+.exp-titel span { font-weight: 400; color: var(--grijs); }
+.exp-tabel { width: 100%; border-collapse: collapse; margin-bottom: 14px; table-layout: fixed; }
+.exp-tabel th, .exp-tabel td {
+  border: 1px solid #b9c6d2; padding: 4px 6px; font-size: 12px;
+  text-align: left; vertical-align: top; word-break: break-word;
+}
+.exp-tijd { background: #f6a96b; color: #1a2233; font-weight: 800; width: 92px; white-space: nowrap; }
+.exp-zone { background: #fbd2b0; color: #1a2233; font-weight: 700; }
+.exp-rijlabel { background: #fff; width: 92px; border-right: 1px solid #b9c6d2; }
+.exp-vrijwilliger { font-weight: 800; background: #fff7f0; }
+/* Statuskleuren = legenda */
+.exp-nieuw { background: #cdeccd; }
+.exp-oproep { background: #fff3a3; }
+.exp-afwezig { background: #e3e6e9; color: #6b7682; text-decoration: line-through; }
+.exp-verplaatst { background: #cfe8ff; }
+.exp-taxi { background: #ffd9b0; }
+.exp-notities { font-size: 12px; margin: 6px 0 10px; }
+.exp-legenda { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 11px; }
+.exp-legenda-titel { font-weight: 700; }
+.exp-legenda-niveau { color: var(--grijs); }
+.exp-chip { padding: 2px 8px; border-radius: 4px; border: 1px solid #b9c6d2; }
+
+/* --- Leerlingen-tabel (breed scherm) --- */
+.leerlingen-tabel { width: 100%; }
+.leerling-rij { cursor: pointer; transition: background-color 0.1s; }
+.leerling-rij:hover { background: var(--color-soft-blue); }
+.opmerkingen-cel { max-width: 420px; }
+.leerling-naam-link { color: var(--color-primary); font-weight: 700; cursor: pointer; text-decoration: none; }
+.leerling-naam-link:hover { text-decoration: underline; }
+.opmerkingen-cel .badge.kritiek { margin-right: 6px; }
+
+/* Toon/verberg op basis van schermbreedte (desktop vs mobiel). */
+.alleen-mobiel { display: none; }
+.alleen-desktop { display: table; }
+
+/* Kind-kaart (mobiele weergave van 'mijn dag'). */
+.kind-kaarten { display: flex; flex-direction: column; gap: 10px; }
+.kind-kaart { border: 1px solid var(--rand); border-left: 4px solid var(--color-accent); border-radius: 10px; padding: 12px; background: #fff; }
+.kind-kaart-kop { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.kind-kaart-badges { display: inline-flex; gap: 6px; flex-shrink: 0; }
+.kind-kaart-kop .leerling-naam-link { font-size: 17px; }
+.kind-kaart-opm { font-size: 14px; margin: 6px 0 10px; }
+.aw-knoppen-breed { display: flex; gap: 8px; }
+.aw-knoppen-breed .aw-btn { flex: 1; padding: 12px 6px; font-size: 14px; text-align: center; }
+
+/* --- Snelkiezer lesdagen (vrijwilliger-dashboard) --- */
+.lesdag-kiezer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.lesdag-chip {
+  background: #eef0f3; color: #344054; box-shadow: none;
+  border-radius: 1.5rem; padding: 7px 14px; font-size: 14px; text-transform: capitalize;
+}
+.lesdag-chip:first-of-type { background: var(--color-light-bg); color: var(--color-primary); font-weight: 800; }
+.lesdag-chip.actief { background: var(--color-primary); color: #fff; }
+
+/* --- Beheer-pagina --- */
+.beheer-kaart { text-decoration: none; color: inherit; display: block; transition: transform 0.15s, box-shadow 0.2s; }
+.beheer-kaart:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 108, 183, 0.18); }
+.beheer-icoon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; border-radius: 12px;
+  background: var(--color-light-bg); color: var(--color-primary); margin-bottom: 10px;
+}
+.beheer-kaart h3 { margin: 0 0 4px; color: var(--color-primary); }
+
+/* Status als klikbare knop (zwemkaart-niveaus) */
+/* --- Template toepassen (badindeling) --- */
+.template-toepassen { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rand); }
+.template-toepassen-titel { font-size: 1rem; margin: 0 0 8px; color: var(--color-primary); }
+.template-waarschuwing { font-size: 13px; color: #b45309; margin-top: 6px; }
+
+/* --- Badindeling weekagenda --- */
+.week-nav { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.week-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.week-dag { background: #fff; border: 1px solid var(--rand); border-radius: 10px; padding: 10px; min-height: 120px; }
+.week-dag-kop { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; border-bottom: 2px solid var(--color-accent); padding-bottom: 4px; }
+.week-dag-naam { font-weight: 800; color: var(--color-primary); text-transform: capitalize; }
+.week-vakantie { background: #f2f4f6; }
+.week-vak-label { color: var(--grijs); font-size: 13px; font-style: italic; }
+.week-les {
+  display: block; width: 100%; text-align: left; margin-bottom: 8px;
+  background: var(--color-soft-blue); color: inherit; border: 1px solid var(--rand);
+  border-radius: 8px; padding: 8px 10px; box-shadow: none;
+}
+.week-les:hover { background: var(--color-light-bg); transform: none; }
+.week-les-naam { display: block; font-weight: 700; font-size: 14px; color: var(--color-primary); }
+.gekleed-badge { background: #fff3a3; color: #7a5c00; font-weight: 700; font-size: 12px; padding: 4px 8px; border-radius: 6px; margin-bottom: 8px; }
+
+@media (max-width: 900px) {
+  .week-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .week-grid { grid-template-columns: 1fr; }
+}
+
+/* --- Agenda-pagina --- */
+.agenda-volgende { border-left: 4px solid var(--color-accent); }
+.agenda-volgende-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-accent); }
+.agenda-volgende-body { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px; flex-wrap: wrap; }
+.agenda-layout { display: grid; grid-template-columns: 1fr 300px; gap: 16px; align-items: start; }
+.agenda-week { margin: 0; }
+.agenda-detail { background: #fff; border: 1px solid var(--rand); border-radius: 10px; padding: 16px; position: sticky; top: 12px; }
+.week-vandaag { outline: 2px solid var(--color-primary); outline-offset: -1px; }
+.week-afspraak { background: #fff3a3; border-color: #e6c200; }
+.week-afspraak:hover { background: #ffec80; }
+.week-les-actief { background: var(--color-light-bg); border-color: var(--color-primary); }
+@media (max-width: 800px) {
+  .agenda-layout { grid-template-columns: 1fr; }
+  .agenda-detail { position: static; }
+}
+
+/* --- Niveaus-beheer --- */
+.niveau-rij { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rand); }
+.niveau-rij:last-child { border-bottom: none; }
+.niveau-volg { color: var(--grijs); font-weight: 700; width: 26px; }
+.niveau-naam { flex: 1; font-weight: 600; }
+.niveau-acties { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* --- Aanwezigheid --- */
+.aw-telling { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 14px; }
+.aw-chip { padding: 3px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.aw-aanwezig { background: #e4f7ec; color: #047857; }
+.aw-afgemeld { background: #fff4e0; color: #b45309; }
+.aw-afwezig { background: #fde7e6; color: var(--rood); }
+
+.aw-rij { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rand); flex-wrap: wrap; }
+.aw-rij:last-child { border-bottom: none; }
+.aw-naam { font-weight: 600; }
+.aw-knoppen { display: flex; gap: 6px; }
+.aw-btn {
+  background: #eef0f3; color: #344054; border: 2px solid transparent;
+  box-shadow: none; padding: 6px 12px; font-size: 13px; border-radius: 8px;
+}
+.aw-btn:hover { transform: none; }
+.aw-btn.aw-actief.aw-aanwezig { background: #047857; color: #fff; }
+.aw-btn.aw-actief.aw-afgemeld { background: #b45309; color: #fff; }
+.aw-btn.aw-actief.aw-afwezig { background: var(--rood); color: #fff; }
+
+/* Eén-voor-één */
+.aw-een { text-align: center; }
+.aw-een-knoppen { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 16px 0; }
+.aw-btn-groot {
+  background: #eef0f3; color: #344054; border: 2px solid transparent;
+  box-shadow: none; padding: 18px 28px; font-size: 16px; border-radius: 12px; min-width: 130px;
+}
+.aw-btn-groot:hover { transform: translateY(-1px); }
+.aw-btn-groot.aw-actief.aw-aanwezig { background: #047857; color: #fff; }
+.aw-btn-groot.aw-actief.aw-afgemeld { background: #b45309; color: #fff; }
+.aw-btn-groot.aw-actief.aw-afwezig { background: var(--rood); color: #fff; }
+.aw-nav { display: flex; justify-content: space-between; gap: 8px; }
+
+/* Overzicht op leerlingdossier */
+.aw-overzicht { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.aw-percentage { display: flex; flex-direction: column; align-items: center; }
+.aw-percentage-getal { font-size: 2.4rem; font-weight: 800; color: var(--color-primary); line-height: 1; }
+
+/* Tijdens export: verberg alle bewerk-elementen */
+.exporteren .noprint { display: none !important; }
+.exporteren .blok-label, .exporteren .zone-naam { background: transparent; }
+.exporteren .zone-vrijwilliger { -webkit-appearance: none; appearance: none; background: transparent; border: none; padding: 0; }
+
+/* Tabs (vrijwilliger-dashboard) */
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.tab {
+  background: #eef0f3; color: #344054; box-shadow: none;
+  border-radius: 1.5rem; padding: 0.5rem 1.2rem;
+}
+.tab.actief { background: var(--color-primary); color: #fff; }
+
+/* Kennisbank: één kolom, leesbare meerregelige inhoud */
+.kennis-lijst { display: flex; flex-direction: column; gap: 16px; }
+.kennis-inhoud { white-space: pre-wrap; line-height: 1.55; }
+
+/* Publieke links onder loginformulier */
+.login-links { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; font-size: 14px; }
+.login-links a { color: var(--color-primary); font-weight: 700; text-decoration: none; }
+.login-links a:hover { text-decoration: underline; }
+
+/* --- Responsief --- */
+@media (max-width: 768px) {
+  .dl { grid-template-columns: 1fr; gap: 0; }
+  .dl dt {
+    margin-top: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--grijs);
+  }
+  .dl dd {
+    margin: 1px 0 10px; padding-bottom: 10px; font-size: 15px;
+    border-bottom: 1px solid var(--rand);
+  }
+  .dl dd:last-child { border-bottom: none; }
+}
+
+/* ===================== Mobiel (telefoon) ===================== */
+@media (max-width: 640px) {
+  /* Content vult het scherm met kleine marge; minder afronding. */
+  .content, .content-breed {
+    margin: 12px 8px; padding: 14px; border-radius: 12px;
+  }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+
+  /* Inputs minimaal 16px zodat iOS niet inzoomt bij focus. */
+  input, select, textarea, .notitie-input { font-size: 16px !important; }
+  .zoek { max-width: 100%; }
+
+  /* Cards iets compacter. */
+  .card { padding: 1rem; }
+
+  /* Brede tabellen scrollen horizontaal binnen hun kaart; nettere tap-grootte. */
+  .tabel th, .tabel td { padding: 10px 8px; }
+  .tabel th { font-size: 0.7rem; }
+  .opmerkingen-cel { max-width: none; }
+
+  /* Grids naar één kolom. */
+  .grid { grid-template-columns: 1fr; }
+
+  /* Knoppen iets groter voor vingers; kop-rij knoppen mogen breken. */
+  button, .knop-link { padding: 10px 16px; }
+  .kop-rij { gap: 8px; }
+  .kop-rij > div { flex-wrap: wrap; }
+
+  /* Aanwezigheid-knoppen onder elkaar passend. */
+  .aw-knoppen { flex-wrap: wrap; }
+  .aw-btn { padding: 8px 12px; }
+
+  /* Badindeling: lijst en rooster onder elkaar (werkblad is al kolom <700px). */
+  .indeel-lijst { position: static; max-height: none; }
+  .zones { gap: 10px; }
+  .zone { flex-basis: 160px; }
+
+  /* Weekagenda: dagen onder elkaar (was al, hier bevestigd). */
+  .week-grid { grid-template-columns: 1fr; }
+
+  /* Topbar-gebruikersinfo compacter. */
+  .user-info { display: none; }
+
+  /* Minder essentiële tabelkolommen verbergen op telefoon. */
+  .mobiel-verberg { display: none; }
+
+  /* Desktop-tabel verbergen, mobiele kaarten tonen. */
+  .alleen-desktop { display: none !important; }
+  .alleen-mobiel { display: block; }
+
+  /* Tabs vullen de breedte en zijn beter aan te tikken. */
+  .tabs { gap: 6px; }
+  .tabs .tab { flex: 1; padding: 10px 8px; font-size: 13px; text-align: center; }
+
+  /* Lesdag-snelkiezer: chips onder elkaar/ruim, label op eigen regel. */
+  .lesdag-kiezer { flex-direction: column; align-items: stretch; }
+  .lesdag-kiezer .muted { margin-bottom: 2px; }
+  .lesdag-chip { width: 100%; text-align: center; padding: 11px; font-size: 15px; }
+
+  /* 'Aanwezigheid opslaan'-knop onder de titel, volle breedte. */
+  .kind-kaarten + *, .card .kop-rij > button { width: 100%; }
+  .card .kop-rij { flex-direction: column; align-items: stretch; }
+}
+
+/* Heel smalle schermen: nóg compacter. */
+@media (max-width: 380px) {
+  .topbar { padding: 10px 12px; }
+  .brand { font-size: 18px; }
+  .brand img { max-height: 34px; }
+}

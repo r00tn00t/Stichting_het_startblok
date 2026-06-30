@@ -1,0 +1,170 @@
+import { Router } from 'express';
+import { Aanwezigheid } from '../models/Aanwezigheid.js';
+import { Activiteit } from '../models/Activiteit.js';
+import { Leerling } from '../models/Leerling.js';
+import { Badindeling } from '../models/Badindeling.js';
+import { requireAuth, requireRole, loadUserScope } from '../middleware/auth.js';
+import { ROLES } from '../config/roles.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
+import { magActiviteitBeheren, zitOpActiviteit, magLeerlingZien } from '../middleware/scope.js';
+
+const router = Router();
+router.use(requireAuth);
+router.use(loadUserScope);
+
+function dagStart(datumStr) {
+  const d = new Date(datumStr);
+  if (Number.isNaN(d.getTime())) return null;
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+}
+
+// GET /api/aanwezigheid?activiteit=..&datum=YYYY-MM-DD
+// Geeft de leerlingen van de activiteit + hun status op die datum (default 'aanwezig').
+router.get('/', asyncHandler(async (req, res) => {
+  const { activiteit, datum } = req.query;
+  if (!activiteit || !datum) return res.status(400).json({ error: 'activiteit en datum zijn verplicht' });
+  const dag = dagStart(datum);
+  if (!dag) return res.status(400).json({ error: 'Ongeldige datum' });
+
+  const act = await Activiteit.findById(activiteit);
+  if (!act) return res.status(404).json({ error: 'Activiteit niet gevonden' });
+  const magBeheren = magActiviteitBeheren(req.user, act);
+  if (!magBeheren && !zitOpActiviteit(req.user, act._id)) {
+    return res.status(403).json({ error: 'Geen toegang tot deze activiteit' });
+  }
+
+  const leerlingen = await Leerling.find({ activiteiten: activiteit, actief: true }).sort({ naam: 1 }).select('naam');
+  const registraties = await Aanwezigheid.find({ activiteit, datum: dag });
+  const perLeerling = new Map(registraties.map((r) => [r.leerling.toString(), r.status]));
+
+  const lijst = leerlingen.map((l) => ({
+    leerling: l._id,
+    naam: l.naam,
+    status: perLeerling.get(l._id.toString()) || null, // null = nog niet geregistreerd
+  }));
+  res.json({ lijst, magBeheren });
+}));
+
+// PUT /api/aanwezigheid — bulk upsert voor activiteit+datum. Alleen coördinator/directie.
+// body: { activiteit, datum, registraties: [{ leerling, status }] }
+router.put('/', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) => {
+  const { activiteit, datum, registraties = [] } = req.body || {};
+  if (!activiteit || !datum) return res.status(400).json({ error: 'activiteit en datum zijn verplicht' });
+  const dag = dagStart(datum);
+  if (!dag) return res.status(400).json({ error: 'Ongeldige datum' });
+
+  const act = await Activiteit.findById(activiteit);
+  if (!act) return res.status(404).json({ error: 'Activiteit niet gevonden' });
+  if (!magActiviteitBeheren(req.user, act)) {
+    return res.status(403).json({ error: 'Je mag deze activiteit niet registreren' });
+  }
+
+  const ops = registraties
+    .filter((r) => r.leerling && r.status)
+    .map((r) => ({
+      updateOne: {
+        filter: { leerling: r.leerling, activiteit, datum: dag },
+        update: { $set: { status: r.status, geregistreerdDoor: req.user.id } },
+        upsert: true,
+      },
+    }));
+  if (ops.length) await Aanwezigheid.bulkWrite(ops);
+  res.json({ ok: true, aantal: ops.length });
+}));
+
+// PUT /api/aanwezigheid/mijn — vrijwilliger registreert aanwezigheid voor de
+// kinderen die hém/haar op die datum zijn toegewezen (badindeling). Gescoped:
+// een vrijwilliger kan alleen de eigen toegewezen kinderen afvinken.
+// body: { activiteit, datum, registraties: [{ leerling, status }] }
+router.put('/mijn', asyncHandler(async (req, res) => {
+  const { activiteit, datum, registraties = [] } = req.body || {};
+  if (!activiteit || !datum) return res.status(400).json({ error: 'activiteit en datum zijn verplicht' });
+  const dag = dagStart(datum);
+  if (!dag) return res.status(400).json({ error: 'Ongeldige datum' });
+
+  // Coördinator/directie gebruiken gewoon de gewone PUT; dit endpoint is bedoeld
+  // voor vrijwilligers maar werkt voor iedereen die toegewezen kinderen heeft.
+  const dagEinde = new Date(dag.getTime() + 24 * 60 * 60 * 1000);
+  const indelingen = await Badindeling.find({
+    activiteit, datum: { $gte: dag, $lt: dagEinde }, 'blokken.zones.vrijwilliger': req.user.id,
+  });
+
+  // Verzamel de leerling-id's die aan deze gebruiker zijn toegewezen.
+  const toegestaan = new Set();
+  for (const ind of indelingen) {
+    for (const blok of ind.blokken) {
+      for (const zone of blok.zones) {
+        if (zone.vrijwilliger?.toString() === req.user.id) {
+          zone.kinderen.forEach((k) => toegestaan.add(k.leerling.toString()));
+        }
+      }
+    }
+  }
+  if (toegestaan.size === 0) {
+    return res.status(403).json({ error: 'Je hebt geen toegewezen kinderen voor deze les' });
+  }
+
+  const ops = registraties
+    .filter((r) => r.leerling && r.status && toegestaan.has(r.leerling.toString()))
+    .map((r) => ({
+      updateOne: {
+        filter: { leerling: r.leerling, activiteit, datum: dag },
+        update: { $set: { status: r.status, geregistreerdDoor: req.user.id } },
+        upsert: true,
+      },
+    }));
+  if (ops.length) await Aanwezigheid.bulkWrite(ops);
+  res.json({ ok: true, aantal: ops.length });
+}));
+
+// GET /api/aanwezigheid/samenvatting — percentage per leerling (voor de lijst).
+// Aggregatie: per leerling totaal + aantal aanwezig. Geeft alleen leerlingen
+// met registraties terug ({ leerlingId: { totaal, aanwezig, percentage } }).
+router.get('/samenvatting', asyncHandler(async (_req, res) => {
+  const rijen = await Aanwezigheid.aggregate([
+    {
+      $group: {
+        _id: '$leerling',
+        totaal: { $sum: 1 },
+        aanwezig: { $sum: { $cond: [{ $eq: ['$status', 'aanwezig'] }, 1, 0] } },
+      },
+    },
+  ]);
+  const map = {};
+  for (const r of rijen) {
+    map[r._id.toString()] = {
+      totaal: r.totaal,
+      aanwezig: r.aanwezig,
+      percentage: r.totaal ? Math.round((r.aanwezig / r.totaal) * 100) : null,
+    };
+  }
+  res.json(map);
+}));
+
+// GET /api/aanwezigheid/leerling/:id — statistiek + recente historie van één leerling.
+router.get('/leerling/:id', asyncHandler(async (req, res) => {
+  const leerling = await Leerling.findById(req.params.id);
+  if (!leerling) return res.status(404).json({ error: 'Leerling niet gevonden' });
+  if (!magLeerlingZien(req.user, leerling)) {
+    return res.status(403).json({ error: 'Geen toegang tot deze leerling' });
+  }
+
+  const registraties = await Aanwezigheid.find({ leerling: leerling._id })
+    .populate('activiteit', 'naam')
+    .sort({ datum: -1 });
+
+  const totaal = registraties.length;
+  const aanwezig = registraties.filter((r) => r.status === 'aanwezig').length;
+  const afgemeld = registraties.filter((r) => r.status === 'afgemeld').length;
+  const afwezig = registraties.filter((r) => r.status === 'afwezig').length;
+  const percentage = totaal ? Math.round((aanwezig / totaal) * 100) : null;
+
+  res.json({
+    totaal, aanwezig, afgemeld, afwezig, percentage,
+    historie: registraties.slice(0, 20).map((r) => ({
+      datum: r.datum, status: r.status, activiteit: r.activiteit?.naam || '',
+    })),
+  });
+}));
+
+export default router;
