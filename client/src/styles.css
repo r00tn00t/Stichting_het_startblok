@@ -355,6 +355,13 @@ form button[type="submit"] { margin-top: 16px; }
 .exp-legenda-niveau { color: var(--grijs); }
 .exp-chip { padding: 2px 8px; border-radius: 4px; border: 1px solid #b9c6d2; }
 
+/* --- Leerlingen-tabel (breed scherm) --- */
+.leerlingen-tabel { width: 100%; }
+.leerling-rij { cursor: pointer; transition: background-color 0.1s; }
+.leerling-rij:hover { background: var(--color-soft-blue); }
+.opmerkingen-cel { max-width: 420px; }
+.opmerkingen-cel .badge.kritiek { margin-right: 6px; }
+
 /* --- Beheer-pagina --- */
 .beheer-kaart { text-decoration: none; color: inherit; display: block; transition: transform 0.15s, box-shadow 0.2s; }
 .beheer-kaart:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 108, 183, 0.18); }

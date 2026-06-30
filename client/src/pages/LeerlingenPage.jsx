@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function LeerlingenPage() {
   const { heeftRol } = useAuth();
+  const navigate = useNavigate();
   const [leerlingen, setLeerlingen] = useState([]);
   const [aanwezigheid, setAanwezigheid] = useState({}); // { leerlingId: {percentage, aanwezig, totaal} }
   const [fout, setFout] = useState('');
@@ -17,6 +18,12 @@ export default function LeerlingenPage() {
 
   // Kleur op basis van percentage: groen hoog, oranje midden, rood laag.
   const awKlasse = (p) => (p >= 80 ? 'aw-aanwezig' : p >= 50 ? 'aw-afgemeld' : 'aw-afwezig');
+
+  // Belangrijke opmerkingen: kritieke/belangrijke medische punten samengevat.
+  const belangrijkePunten = (l) =>
+    (l.medischeAandachtspunten || [])
+      .filter((a) => a.urgentie === 'kritiek' || a.urgentie === 'belangrijk')
+      .map((a) => a.titel);
 
   const gefilterd = leerlingen.filter((l) =>
     l.naam.toLowerCase().includes(zoek.toLowerCase())
@@ -37,23 +44,49 @@ export default function LeerlingenPage() {
         value={zoek}
         onChange={(e) => setZoek(e.target.value)}
       />
-      <div className="grid">
-        {gefilterd.map((l) => (
-          <Link key={l._id} to={`/leerlingen/${l._id}`} className="card leerling-card">
-            <h3>{l.naam}</h3>
-            <p className="muted">{l.typeBeperking || 'Geen beperking opgegeven'}</p>
-            {l.niveau && <span className="badge">{l.niveau}</span>}
-            {l.medischeAandachtspunten?.some((a) => a.urgentie === 'kritiek') && (
-              <span className="badge kritiek">⚠ Kritiek aandachtspunt</span>
+
+      <div className="card" style={{ overflowX: 'auto' }}>
+        <table className="tabel leerlingen-tabel">
+          <thead>
+            <tr>
+              <th>Naam</th>
+              <th>Beperking</th>
+              <th>Niveau</th>
+              <th>Zwemtijd</th>
+              <th>Aanwezigheid</th>
+              <th>Belangrijke opmerkingen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {gefilterd.map((l) => {
+              const punten = belangrijkePunten(l);
+              const kritiek = (l.medischeAandachtspunten || []).some((a) => a.urgentie === 'kritiek');
+              const aw = aanwezigheid[l._id];
+              return (
+                <tr key={l._id} className="leerling-rij" onClick={() => navigate(`/leerlingen/${l._id}`)}>
+                  <td><strong>{l.naam}</strong></td>
+                  <td className="muted">{l.typeBeperking || '—'}</td>
+                  <td>{l.niveau ? <span className="badge">{l.niveau}</span> : '—'}</td>
+                  <td className="muted">{l.zwemtijd || '—'}</td>
+                  <td>
+                    {aw
+                      ? <span className={`aw-chip ${awKlasse(aw.percentage)}`}>{aw.percentage}% ({aw.aanwezig}/{aw.totaal})</span>
+                      : <span className="muted">—</span>}
+                  </td>
+                  <td className="opmerkingen-cel">
+                    {kritiek && <span className="badge kritiek">⚠ Kritiek</span>}
+                    {punten.length > 0
+                      ? <span>{punten.join(', ')}</span>
+                      : <span className="muted">{l.communicatieTips || '—'}</span>}
+                  </td>
+                </tr>
+              );
+            })}
+            {gefilterd.length === 0 && (
+              <tr><td colSpan={6} className="muted">Geen leerlingen gevonden.</td></tr>
             )}
-            {aanwezigheid[l._id] && (
-              <span className={`aw-chip ${awKlasse(aanwezigheid[l._id].percentage)}`} style={{ marginTop: 8, display: 'inline-block' }}>
-                {aanwezigheid[l._id].percentage}% ({aanwezigheid[l._id].aanwezig}/{aanwezigheid[l._id].totaal})
-              </span>
-            )}
-          </Link>
-        ))}
-        {gefilterd.length === 0 && <p className="muted">Geen leerlingen gevonden.</p>}
+          </tbody>
+        </table>
       </div>
     </div>
   );

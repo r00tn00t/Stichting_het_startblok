@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext.jsx';
 import Icon from './Icon.jsx';
 
 // Pagina's die de volle schermbreedte gebruiken (breed rooster e.d.).
-const BREDE_PADEN = ['/badindeling'];
+const BREDE_PADEN = ['/badindeling']; // ook subpaden
+const BREDE_PADEN_EXACT = ['/leerlingen']; // alleen de lijst, niet detail/bewerken
 
 const rolLabel = {
   vrijwilliger: 'Vrijwilliger',
@@ -14,7 +15,7 @@ const rolLabel = {
 export default function Layout() {
   const { user, logout, heeftRol } = useAuth();
   const { pathname } = useLocation();
-  const breed = BREDE_PADEN.some((p) => pathname.startsWith(p));
+  const breed = BREDE_PADEN.some((p) => pathname.startsWith(p)) || BREDE_PADEN_EXACT.includes(pathname);
   return (
     <div className="app">
       <header className="topbar">
