@@ -80,10 +80,45 @@ body {
 }
 .topbar .user button:hover { background: rgba(255, 255, 255, 0.28); transform: none; }
 
+/* Hamburger + in-nav gebruiker zijn standaard verborgen (desktop). */
+.menu-knop { display: none; }
+.nav-gebruiker { display: none; }
+
 @media (max-width: 860px) {
-  .topbar { gap: 12px; padding: 14px 18px; }
-  .topbar nav { order: 3; width: 100%; }
-  .topbar nav a { font-size: 14px; padding: 9px 12px; }
+  .topbar { gap: 12px; padding: 12px 16px; flex-wrap: nowrap; }
+  .brand { flex: 1; font-size: 19px; }
+
+  /* Hamburger tonen, desktop-gebruikersblok verbergen. */
+  .menu-knop {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 42px; height: 42px; font-size: 22px; line-height: 1;
+    background: rgba(255, 255, 255, 0.16); color: #fff;
+    border: none; border-radius: 10px; box-shadow: none; padding: 0;
+  }
+  .topbar .user { display: none; }
+
+  /* Nav wordt een uitklapbaar paneel onder de balk. */
+  .topbar nav {
+    order: 3; width: 100%;
+    display: none; flex-direction: column; gap: 4px;
+    margin: 8px -16px -12px; padding: 8px 16px 12px;
+    background: var(--color-primary);
+  }
+  .topbar nav.nav-open { display: flex; }
+  .topbar nav a {
+    font-size: 16px; padding: 12px 14px; border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .topbar nav a .ico { width: 22px; height: 22px; }
+
+  /* Gebruiker + uitloggen onderaan het uitklapmenu. */
+  .nav-gebruiker {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-top: 8px; padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .nav-gebruiker .muted { color: rgba(255, 255, 255, 0.85); font-size: 13px; }
+  .nav-gebruiker button { background: rgba(255, 255, 255, 0.16); color: #fff; border: 1px solid rgba(255, 255, 255, 0.4); }
 }
 
 .content {
