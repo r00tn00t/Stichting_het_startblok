@@ -51,7 +51,6 @@ export default function LeerlingenPage() {
             <tr>
               <th>Naam</th>
               <th className="mobiel-verberg">Beperking</th>
-              <th className="mobiel-verberg">Niveau</th>
               <th className="mobiel-verberg">Zwemtijd</th>
               <th>Aanwezigheid</th>
               <th>Belangrijke opmerkingen</th>
@@ -66,7 +65,6 @@ export default function LeerlingenPage() {
                 <tr key={l._id} className="leerling-rij" onClick={() => navigate(`/leerlingen/${l._id}`)}>
                   <td><strong>{l.naam}</strong></td>
                   <td className="muted mobiel-verberg">{l.typeBeperking || '—'}</td>
-                  <td className="mobiel-verberg">{l.niveau ? <span className="badge">{l.niveau}</span> : '—'}</td>
                   <td className="muted mobiel-verberg">{l.zwemtijd || '—'}</td>
                   <td>
                     {aw
@@ -83,7 +81,7 @@ export default function LeerlingenPage() {
               );
             })}
             {gefilterd.length === 0 && (
-              <tr><td colSpan={6} className="muted">Geen leerlingen gevonden.</td></tr>
+              <tr><td colSpan={5} className="muted">Geen leerlingen gevonden.</td></tr>
             )}
           </tbody>
         </table>

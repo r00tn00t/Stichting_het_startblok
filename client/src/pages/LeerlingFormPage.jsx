@@ -20,8 +20,6 @@ const leegFormulier = {
   communicatieTips: '',
   watWerktWel: '',
   watWerktNiet: '',
-  niveau: '',
-  niveauToelichting: '',
   locatie: '',
   activiteiten: [],
   zwemtijd: '',
@@ -40,14 +38,12 @@ export default function LeerlingFormPage() {
   const [bezig, setBezig] = useState(false);
   const [locaties, setLocaties] = useState([]);
   const [activiteiten, setActiviteiten] = useState([]);
-  const [niveaus, setNiveaus] = useState([]); // namen van de DB-niveaus
   const [templates, setTemplates] = useState([]);
 
-  // Locaties + activiteiten + niveaus + templates ophalen voor de keuzelijsten.
+  // Locaties + activiteiten + templates ophalen voor de keuzelijsten.
   useEffect(() => {
     api('/locaties').then(setLocaties).catch((e) => setFout(e.message));
     api('/activiteiten').then(setActiviteiten).catch((e) => setFout(e.message));
-    api('/niveaus').then((lijst) => setNiveaus(lijst.map((n) => n.naam))).catch(() => {});
     api('/templates').then(setTemplates).catch(() => {});
   }, []);
 
@@ -170,20 +166,7 @@ export default function LeerlingFormPage() {
                 ))}
               </select>
             </label>
-            <label>
-              Niveau
-              <select value={form.niveau} onChange={set('niveau')}>
-                <option value="">— kies niveau —</option>
-                {niveaus.map((n) => <option key={n} value={n}>{n}</option>)}
-                {/* Behoud een bestaand (oud) niveau dat niet in de lijst staat. */}
-                {form.niveau && !niveaus.includes(form.niveau) && <option value={form.niveau}>{form.niveau}</option>}
-              </select>
-            </label>
           </div>
-          <label className="vol">
-            Toelichting bij niveau
-            <input value={form.niveauToelichting} onChange={set('niveauToelichting')} placeholder="bv. lukt bijna zonder steun" />
-          </label>
 
           <label className="vol">
             Communicatietips

@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import { connectDB } from './config/db.js';
 import { User } from './models/User.js';
 import { Leerling } from './models/Leerling.js';
-import { Voortgang } from './models/Voortgang.js';
 import { KennisbankItem } from './models/KennisbankItem.js';
 import { kennisbankItems } from './data/kennisbank.js';
 import { Inschrijving } from './models/Inschrijving.js';
@@ -11,8 +10,6 @@ import { Locatie } from './models/Locatie.js';
 import { Activiteit } from './models/Activiteit.js';
 import { Badindeling } from './models/Badindeling.js';
 import { locatieData } from './data/locaties.js';
-import { NIVEAUS } from './data/niveaus.js';
-import { Niveau } from './models/Niveau.js';
 import { Vakantie } from './models/Vakantie.js';
 import { vakantieData } from './data/vakanties.js';
 import { ROLES } from './config/roles.js';
@@ -31,18 +28,13 @@ async function run() {
   await Promise.all([
     User.deleteMany({}),
     Leerling.deleteMany({}),
-    Voortgang.deleteMany({}),
     KennisbankItem.deleteMany({}),
     Inschrijving.deleteMany({}),
     Locatie.deleteMany({}),
     Activiteit.deleteMany({}),
     Badindeling.deleteMany({}),
-    Niveau.deleteMany({}),
     Vakantie.deleteMany({}),
   ]);
-
-  // Niveaus (de 12 vaardigheden uit de kennisbank), op volgorde.
-  await Niveau.insertMany(NIVEAUS.map((naam, i) => ({ naam, volgorde: i })));
 
   // Vakanties & feestdagen 2025/2026.
   await Vakantie.insertMany(vakantieData.map((v) => ({ naam: v.naam, van: new Date(v.van), tot: new Date(v.tot) })));
@@ -108,13 +100,12 @@ async function run() {
     communicatieTips: 'Korte, duidelijke instructies. Gebruik pictogrammen. Geef vooraf aan wat er gaat gebeuren.',
     watWerktWel: 'Vaste structuur en herhaling.',
     watWerktNiet: 'Onverwachte wisselingen van begeleider.',
-    niveau: 'Watervrij maken / Badje 1',
     contactNaam: 'Mevr. de Vries',
     contactTelefoon: '06-12345678',
     laatstGewijzigdDoor: coordinator._id,
   });
 
-  const lisa = await Leerling.create({
+  await Leerling.create({
     naam: 'Lisa Jansen',
     typeBeperking: 'Spasticiteit (lichamelijk)',
     beperkingCategorie: 'lichamelijk',
@@ -124,16 +115,8 @@ async function run() {
       { titel: 'Beperkte beenkracht', omschrijving: 'Heeft drijfmiddel nodig bij benen.', urgentie: 'info' },
     ],
     communicatieTips: 'Spreekt goed, geef haar tijd om te reageren.',
-    niveau: 'Zwemslag oefenen',
     laatstGewijzigdDoor: coordinator._id,
   });
-
-  await Voortgang.insertMany([
-    { leerling: sem._id, onderdeel: 'Gezicht onder water', categorie: 'Watervrij', status: 'behaald', behaaldOp: new Date(), geregistreerdDoor: coordinator._id },
-    { leerling: sem._id, onderdeel: 'Drijven op de rug', categorie: 'Watervrij', status: 'in-uitvoering', notitie: 'Durft het bijna zonder steun.', geregistreerdDoor: coordinator._id },
-    { leerling: sem._id, onderdeel: 'Watertrappelen 10 sec', categorie: 'Diploma A', status: 'nog-niet-begonnen', geregistreerdDoor: coordinator._id },
-    { leerling: lisa._id, onderdeel: 'Schoolslag benen', categorie: 'Diploma A', status: 'in-uitvoering', notitie: 'Met drijfmiddel goed, zonder nog niet.', geregistreerdDoor: coordinator._id },
-  ]);
 
   await KennisbankItem.insertMany(
     kennisbankItems.map((item) => ({ ...item, aangemaaktDoor: coordinator._id }))

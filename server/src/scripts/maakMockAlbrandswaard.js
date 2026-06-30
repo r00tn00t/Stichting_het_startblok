@@ -11,7 +11,6 @@ import { User } from '../models/User.js';
 import { Leerling } from '../models/Leerling.js';
 import { Locatie } from '../models/Locatie.js';
 import { Activiteit } from '../models/Activiteit.js';
-import { NIVEAUS } from '../data/niveaus.js';
 import { ROLES } from '../config/roles.js';
 
 const WACHTWOORD = 'Wachtwoord1!';
@@ -120,8 +119,6 @@ async function run() {
       communicatieTips: pick(TIPS, i),
       watWerktWel: pick(['Herhaling', 'Spelvorm', 'Vaste begeleider', 'Belonen met sticker'], i),
       watWerktNiet: pick(['Tijdsdruk', 'Wisselende begeleiders', 'Drukke omgeving'], i),
-      niveau: pick(NIVEAUS, i),
-      niveauToelichting: pick(['lukt bijna zelfstandig', 'heeft nog steun nodig', 'gaat goed vooruit', ''], i),
       locatie: locatie._id,
       activiteiten: [activiteit._id],
       zwemtijd: pick(TIJDSLOTS, i),

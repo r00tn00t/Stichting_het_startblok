@@ -38,15 +38,13 @@ locatie/activiteit · — = geen toegang
 | Inloggen / eigen dag bekijken | ✅ | ✅ | ✅ |
 | Leerlingdossiers bekijken | 👁️ 🔒 | 👁️ 🔒 | 👁️ |
 | Leerling toevoegen / bewerken / archiveren | — | ✅ 🔒 | ✅ |
-| Digitale zwemkaart / voortgang bijwerken | — | ✅ 🔒 | ✅ |
-| Aanwezigheid registreren | — | ✅ 🔒 | ✅ |
+| Aanwezigheid registreren | eigen toegewezen kinderen | ✅ 🔒 | ✅ |
 | Aanwezigheidspercentages bekijken | 👁️ 🔒 | 👁️ 🔒 | 👁️ |
 | Badindeling maken / bewerken | — | ✅ 🔒 | ✅ |
 | Badindeling exporteren (PNG/PDF) | — | ✅ 🔒 | ✅ |
 | Sjablonen (badindeling) beheren | — | ✅ 🔒 | ✅ |
 | Kennisbank lezen | 👁️ | 👁️ | 👁️ |
 | Kennisbank-items toevoegen / verwijderen | — | ✅ | ✅ |
-| Niveaus (zwemvaardigheden) beheren | — | ✅ | ✅ |
 | Agenda bekijken | 👁️ 🔒 | 👁️ 🔒 | 👁️ |
 | Inschrijvingen beoordelen (goedkeuren/afwijzen) | — | ✅ | ✅ |
 | Vrijwilligers goedkeuren / beheren | — | ✅ 🔒 (alleen vrijwilligers) | ✅ |

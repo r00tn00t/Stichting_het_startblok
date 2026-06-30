@@ -3,111 +3,25 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const statusLabel = {
-  'nog-niet-begonnen': 'Nog niet begonnen',
-  'in-uitvoering': 'In uitvoering',
-  behaald: 'Behaald',
-};
-const volgendeStatus = {
-  'nog-niet-begonnen': 'in-uitvoering',
-  'in-uitvoering': 'behaald',
-  behaald: 'nog-niet-begonnen',
-};
-
-const leegRegel = { onderdeel: '', categorie: '', status: 'nog-niet-begonnen', notitie: '' };
-
 export default function LeerlingDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { heeftRol } = useAuth();
   const [data, setData] = useState(null);
   const [fout, setFout] = useState('');
-  const [nieuw, setNieuw] = useState(leegRegel);
-  const [toonNieuw, setToonNieuw] = useState(false);
-  const [bewerktNotitie, setBewerktNotitie] = useState({}); // { regelId: tekst }
   const [aanwezigheid, setAanwezigheid] = useState(null);
-  const [niveaus, setNiveaus] = useState([]); // [{_id, naam}]
 
   const magSchrijven = heeftRol('coordinator');
 
-  function laad() {
-    api(`/leerlingen/${id}`).then(setData).catch((e) => setFout(e.message));
-  }
-  useEffect(laad, [id]);
   useEffect(() => {
+    api(`/leerlingen/${id}`).then(setData).catch((e) => setFout(e.message));
     api(`/aanwezigheid/leerling/${id}`).then(setAanwezigheid).catch(() => setAanwezigheid(null));
-    api('/niveaus').then(setNiveaus).catch(() => setNiveaus([]));
   }, [id]);
-
-  // Status van een vast niveau wisselen. Bestaat er nog geen voortgangsregel voor
-  // dit niveau, dan maken we 'm aan (categorie 'Niveau'); anders doorklikken.
-  async function wisselNiveau(niveauNaam, regel) {
-    try {
-      if (regel) {
-        await api(`/leerlingen/${id}/voortgang/${regel._id}`, {
-          method: 'PUT', body: { status: volgendeStatus[regel.status] },
-        });
-      } else {
-        await api(`/leerlingen/${id}/voortgang`, {
-          method: 'POST', body: { onderdeel: niveauNaam, categorie: 'Niveau', status: 'in-uitvoering' },
-        });
-      }
-      laad();
-    } catch (e) { setFout(e.message); }
-  }
-
-  async function wisselStatus(regel) {
-    try {
-      await api(`/leerlingen/${id}/voortgang/${regel._id}`, {
-        method: 'PUT',
-        body: { status: volgendeStatus[regel.status] },
-      });
-      laad();
-    } catch (e) {
-      setFout(e.message);
-    }
-  }
-
-  async function voegRegelToe(e) {
-    e.preventDefault();
-    try {
-      await api(`/leerlingen/${id}/voortgang`, { method: 'POST', body: nieuw });
-      setNieuw(leegRegel);
-      setToonNieuw(false);
-      laad();
-    } catch (e) {
-      setFout(e.message);
-    }
-  }
-
-  async function slaNotitieOp(regel) {
-    try {
-      await api(`/leerlingen/${id}/voortgang/${regel._id}`, {
-        method: 'PUT',
-        body: { notitie: bewerktNotitie[regel._id] ?? regel.notitie },
-      });
-      setBewerktNotitie((s) => {
-        const k = { ...s };
-        delete k[regel._id];
-        return k;
-      });
-      laad();
-    } catch (e) {
-      setFout(e.message);
-    }
-  }
 
   if (fout) return <div className="alert">{fout}</div>;
   if (!data) return <p>Laden…</p>;
 
-  const { leerling, voortgang } = data;
-  const setNieuwVeld = (veld) => (e) => setNieuw({ ...nieuw, [veld]: e.target.value });
-
-  // Koppel elk niveau aan een bestaande voortgangsregel (op onderdeel-naam).
-  const niveauNamen = new Set(niveaus.map((n) => n.naam));
-  const regelVoorNiveau = (naam) => voortgang.find((v) => v.onderdeel === naam);
-  // Losse onderdelen = voortgang die niet bij een vast niveau hoort.
-  const losseOnderdelen = voortgang.filter((v) => !niveauNamen.has(v.onderdeel));
+  const { leerling } = data;
 
   return (
     <div>
@@ -126,7 +40,6 @@ export default function LeerlingDetailPage() {
           <dt>Geboortedatum</dt><dd>{leerling.geboortedatum ? new Date(leerling.geboortedatum).toLocaleDateString('nl-NL') : '—'}</dd>
           <dt>Type beperking</dt><dd>{leerling.typeBeperking || '—'}</dd>
           <dt>Omschrijving beperking</dt><dd>{leerling.beperkingOmschrijving || '—'}</dd>
-          <dt>Niveau</dt><dd>{leerling.niveau || '—'}{leerling.niveauToelichting ? ` — ${leerling.niveauToelichting}` : ''}</dd>
           <dt>Zwemtijd</dt><dd>{leerling.zwemtijd || '—'}</dd>
           <dt>Communicatietips</dt><dd>{leerling.communicatieTips || '—'}</dd>
           <dt>Wat werkt wel</dt><dd>{leerling.watWerktWel || '—'}</dd>
@@ -211,97 +124,6 @@ export default function LeerlingDetailPage() {
             )}
           </>
         )}
-      </div>
-
-      <div className="card">
-        <h2>Digitale zwemkaart — niveaus</h2>
-        <p className="muted">De vaardigheden uit de kennisbank. {magSchrijven ? 'Klik op de status om door te zetten (nog niet → in uitvoering → behaald).' : ''}</p>
-        <table className="tabel">
-          <thead>
-            <tr><th>Niveau</th><th>Status</th></tr>
-          </thead>
-          <tbody>
-            {niveaus.map((n, i) => {
-              const regel = regelVoorNiveau(n.naam);
-              const status = regel?.status || 'nog-niet-begonnen';
-              return (
-                <tr key={n._id}>
-                  <td><span className="muted">{i + 1}.</span> {n.naam}</td>
-                  <td>
-                    {magSchrijven ? (
-                      <button className={`status status-${status} status-knop`} onClick={() => wisselNiveau(n.naam, regel)}>
-                        {statusLabel[status]}
-                      </button>
-                    ) : (
-                      <span className={`status status-${status}`}>{statusLabel[status]}</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-            {niveaus.length === 0 && <tr><td colSpan={2} className="muted">Nog geen niveaus ingesteld.</td></tr>}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="card">
-        <div className="kop-rij">
-          <h2>Overige onderdelen</h2>
-          {magSchrijven && (
-            <button onClick={() => setToonNieuw((v) => !v)}>
-              {toonNieuw ? 'Annuleren' : '+ Onderdeel'}
-            </button>
-          )}
-        </div>
-
-        {toonNieuw && magSchrijven && (
-          <form className="nieuw-regel" onSubmit={voegRegelToe}>
-            <input placeholder="Onderdeel (bv. Drijven op de rug)" value={nieuw.onderdeel} onChange={setNieuwVeld('onderdeel')} required />
-            <input placeholder="Categorie (bv. Diploma A)" value={nieuw.categorie} onChange={setNieuwVeld('categorie')} />
-            <select value={nieuw.status} onChange={setNieuwVeld('status')}>
-              {Object.entries(statusLabel).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-            <button type="submit" className="mini">Toevoegen</button>
-          </form>
-        )}
-
-        <table className="tabel">
-          <thead>
-            <tr>
-              <th>Onderdeel</th><th>Categorie</th><th>Status</th><th>Notitie</th>
-              {magSchrijven && <th></th>}
-            </tr>
-          </thead>
-          <tbody>
-            {losseOnderdelen.map((v) => (
-              <tr key={v._id}>
-                <td>{v.onderdeel}</td>
-                <td className="muted">{v.categorie}</td>
-                <td><span className={`status status-${v.status}`}>{statusLabel[v.status]}</span></td>
-                <td>
-                  {magSchrijven ? (
-                    <input
-                      className="notitie-input"
-                      value={bewerktNotitie[v._id] ?? v.notitie ?? ''}
-                      placeholder="—"
-                      onChange={(e) => setBewerktNotitie((s) => ({ ...s, [v._id]: e.target.value }))}
-                      onBlur={() => bewerktNotitie[v._id] !== undefined && slaNotitieOp(v)}
-                    />
-                  ) : (
-                    <span className="muted">{v.notitie || '—'}</span>
-                  )}
-                </td>
-                {magSchrijven && (
-                  <td><button className="mini" onClick={() => wisselStatus(v)}>Status →</button></td>
-                )}
-              </tr>
-            ))}
-            {losseOnderdelen.length === 0 && (
-              <tr><td colSpan={magSchrijven ? 5 : 4} className="muted">Nog geen overige onderdelen.</td></tr>
-            )}
-          </tbody>
-        </table>
-        {!magSchrijven && <p className="muted">Je hebt alleen leesrechten.</p>}
       </div>
     </div>
   );

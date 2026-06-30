@@ -33,14 +33,13 @@ router.get('/', asyncHandler(async (req, res) => {
     return res.status(403).json({ error: 'Geen toegang tot deze activiteit' });
   }
 
-  const leerlingen = await Leerling.find({ activiteiten: activiteit, actief: true }).sort({ naam: 1 }).select('naam niveau');
+  const leerlingen = await Leerling.find({ activiteiten: activiteit, actief: true }).sort({ naam: 1 }).select('naam');
   const registraties = await Aanwezigheid.find({ activiteit, datum: dag });
   const perLeerling = new Map(registraties.map((r) => [r.leerling.toString(), r.status]));
 
   const lijst = leerlingen.map((l) => ({
     leerling: l._id,
     naam: l.naam,
-    niveau: l.niveau,
     status: perLeerling.get(l._id.toString()) || null, // null = nog niet geregistreerd
   }));
   res.json({ lijst, magBeheren });

@@ -180,7 +180,7 @@ export default function VrijwilligerDashboard() {
                       <div className="kind-kaart-kop">
                         <a onClick={() => navigate(`/leerlingen/${l._id}`)} className="leerling-naam-link">{l.naam}</a>
                         <span className="kind-kaart-badges">
-                          {(k.niveau || l.niveau) && <span className="badge">{k.niveau || l.niveau}</span>}
+                          {k.niveau && <span className="badge">Diploma {k.niveau}</span>}
                           {aw && <span className={`aw-chip ${awKlasse(aw.percentage)}`}>{aw.percentage}%</span>}
                         </span>
                       </div>
@@ -210,14 +210,13 @@ export default function VrijwilligerDashboard() {
         <div className="card" style={{ overflowX: 'auto' }}>
           <table className="tabel leerlingen-tabel">
             <thead>
-              <tr><th>Naam</th><th>Beperking</th><th>Niveau</th><th>Zwemtijd</th><th>Belangrijke opmerkingen</th></tr>
+              <tr><th>Naam</th><th>Beperking</th><th>Zwemtijd</th><th>Belangrijke opmerkingen</th></tr>
             </thead>
             <tbody>
               {deelnemers.map((l) => (
                 <tr key={l._id} className="leerling-rij" onClick={() => navigate(`/leerlingen/${l._id}`)}>
                   <td><strong>{l.naam}</strong></td>
                   <td className="muted">{l.typeBeperking || '—'}</td>
-                  <td>{l.niveau ? <span className="badge">{l.niveau}</span> : '—'}</td>
                   <td className="muted">{l.zwemtijd || '—'}</td>
                   <td className="opmerkingen-cel">
                     {heeftKritiek(l) && <span className="badge kritiek">⚠ Kritiek</span>}
@@ -225,7 +224,7 @@ export default function VrijwilligerDashboard() {
                   </td>
                 </tr>
               ))}
-              {deelnemers.length === 0 && <tr><td colSpan={5} className="muted">Geen deelnemers gevonden.</td></tr>}
+              {deelnemers.length === 0 && <tr><td colSpan={4} className="muted">Geen deelnemers gevonden.</td></tr>}
             </tbody>
           </table>
         </div>

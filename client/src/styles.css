@@ -433,9 +433,6 @@ form button[type="submit"] { margin-top: 16px; }
 .beheer-kaart h3 { margin: 0 0 4px; color: var(--color-primary); }
 
 /* Status als klikbare knop (zwemkaart-niveaus) */
-.status-knop { border: none; cursor: pointer; box-shadow: none; }
-.status-knop:hover { filter: brightness(0.95); transform: none; }
-
 /* --- Template toepassen (badindeling) --- */
 .template-toepassen { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rand); }
 .template-toepassen-titel { font-size: 1rem; margin: 0 0 8px; color: var(--color-primary); }
