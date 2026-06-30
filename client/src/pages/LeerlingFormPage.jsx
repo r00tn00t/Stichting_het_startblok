@@ -231,15 +231,19 @@ export default function LeerlingFormPage() {
           {form.locatie && (
             <label className="vol">
               Zwemtijd (tijdslot)
-              <input
-                value={form.zwemtijd}
-                onChange={set('zwemtijd')}
-                list="tijdsblok-opties"
-                placeholder={tijdsblokOpties.length ? 'kies of typ een tijd, bv. 19.00-19.30' : 'bv. 19.00-19.30'}
-              />
-              <datalist id="tijdsblok-opties">
-                {tijdsblokOpties.map((t) => <option key={t} value={t} />)}
-              </datalist>
+              <select value={form.zwemtijd} onChange={set('zwemtijd')}>
+                <option value="">— geen / nog niet bekend —</option>
+                {tijdsblokOpties.map((t) => <option key={t} value={t}>{t}</option>)}
+                {/* Behoud een bestaande zwemtijd die niet (meer) in de templates staat. */}
+                {form.zwemtijd && !tijdsblokOpties.includes(form.zwemtijd) && (
+                  <option value={form.zwemtijd}>{form.zwemtijd} (handmatig)</option>
+                )}
+              </select>
+              {tijdsblokOpties.length === 0 && (
+                <span className="muted" style={{ fontSize: 12 }}>
+                  Nog geen tijdsblokken voor deze locatie — voeg een sjabloon toe onder Beheer → Sjablonen.
+                </span>
+              )}
             </label>
           )}
         </div>
