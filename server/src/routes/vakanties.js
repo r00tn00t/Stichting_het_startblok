@@ -20,7 +20,7 @@ router.get('/', asyncHandler(async (_req, res) => {
 }));
 
 // POST /api/vakanties — coördinator/directie
-router.post('/', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) => {
+router.post('/', requireRole(ROLES.DIRECTIE), asyncHandler(async (req, res) => {
   const { naam, van, tot } = req.body || {};
   if (!naam || !van || !tot) return res.status(400).json({ error: 'Naam, van en tot zijn verplicht' });
   const v1 = dagStart(van), v2 = dagStart(tot);
@@ -31,7 +31,7 @@ router.post('/', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) =
 }));
 
 // PUT /api/vakanties/:id
-router.put('/:id', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) => {
+router.put('/:id', requireRole(ROLES.DIRECTIE), asyncHandler(async (req, res) => {
   const { naam, van, tot } = req.body || {};
   const update = {};
   if (naam) update.naam = naam;
@@ -43,7 +43,7 @@ router.put('/:id', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res)
 }));
 
 // DELETE /api/vakanties/:id
-router.delete('/:id', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) => {
+router.delete('/:id', requireRole(ROLES.DIRECTIE), asyncHandler(async (req, res) => {
   const vakantie = await Vakantie.findByIdAndDelete(req.params.id);
   if (!vakantie) return res.status(404).json({ error: 'Vakantie niet gevonden' });
   res.json({ ok: true });

@@ -7,6 +7,7 @@ export default function AfsprakenPage() {
   const [afspraken, setAfspraken] = useState([]);
   const [locaties, setLocaties] = useState([]);
   const [form, setForm] = useState(leeg);
+  const [bewerkId, setBewerkId] = useState(null); // null = nieuw
   const [fout, setFout] = useState('');
   const [melding, setMelding] = useState('');
 
@@ -21,20 +22,39 @@ export default function AfsprakenPage() {
   const set = (v) => (e) => setForm({ ...form, [v]: e.target.value });
   const datum = (d) => new Date(d).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
-  async function voegToe(e) {
+  function reset() { setForm(leeg); setBewerkId(null); }
+
+  function bewerk(a) {
+    setBewerkId(a._id);
+    setForm({
+      titel: a.titel,
+      datum: a.datum.slice(0, 10),
+      tijd: a.tijd || '',
+      locatie: a.locatie?._id || a.locatie || '',
+      omschrijving: a.omschrijving || '',
+    });
+    window.scrollTo(0, 0);
+  }
+
+  async function opslaan(e) {
     e.preventDefault();
     setFout(''); setMelding('');
     try {
-      await api('/afspraken', { method: 'POST', body: form });
-      setForm(leeg);
-      setMelding('Afspraak toegevoegd.');
+      if (bewerkId) {
+        await api(`/afspraken/${bewerkId}`, { method: 'PUT', body: form });
+        setMelding('Afspraak bijgewerkt.');
+      } else {
+        await api('/afspraken', { method: 'POST', body: form });
+        setMelding('Afspraak toegevoegd.');
+      }
+      reset();
       laad();
     } catch (err) { setFout(err.message); }
   }
 
   async function verwijder(id) {
     if (!confirm('Deze afspraak verwijderen?')) return;
-    try { await api(`/afspraken/${id}`, { method: 'DELETE' }); laad(); }
+    try { await api(`/afspraken/${id}`, { method: 'DELETE' }); if (bewerkId === id) reset(); laad(); }
     catch (err) { setFout(err.message); }
   }
 
@@ -49,8 +69,8 @@ export default function AfsprakenPage() {
       {fout && <div className="alert">{fout}</div>}
       {melding && <div className="melding">{melding}</div>}
 
-      <form className="card" onSubmit={voegToe}>
-        <h2>Afspraak toevoegen</h2>
+      <form className="card" onSubmit={opslaan}>
+        <h2>{bewerkId ? 'Afspraak bewerken' : 'Afspraak toevoegen'}</h2>
         <div className="form-grid">
           <label>Titel<input value={form.titel} onChange={set('titel')} required placeholder="bv. Diplomazwemmen" /></label>
           <label>Datum<input type="date" value={form.datum} onChange={set('datum')} required /></label>
@@ -63,7 +83,10 @@ export default function AfsprakenPage() {
           </label>
         </div>
         <label className="vol">Omschrijving<textarea value={form.omschrijving} onChange={set('omschrijving')} rows={2} /></label>
-        <button type="submit">Toevoegen</button>
+        <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+          <button type="submit">{bewerkId ? 'Wijzigingen opslaan' : 'Toevoegen'}</button>
+          {bewerkId && <button type="button" className="grijs" onClick={reset}>Annuleren</button>}
+        </div>
       </form>
 
       <div className="card">
@@ -73,7 +96,10 @@ export default function AfsprakenPage() {
           <div key={a._id} className="niveau-rij">
             <span className="niveau-naam">{a.titel}</span>
             <span className="muted">{datum(a.datum)}{a.tijd ? ` · ${a.tijd}` : ''}{a.locatie?.naam ? ` · ${a.locatie.naam}` : ''}</span>
-            <span className="niveau-acties"><button className="mini grijs" onClick={() => verwijder(a._id)}>Verwijder</button></span>
+            <span className="niveau-acties">
+              <button className="mini grijs" onClick={() => bewerk(a)}>Bewerken</button>
+              <button className="mini grijs" onClick={() => verwijder(a._id)}>Verwijder</button>
+            </span>
           </div>
         ))}
       </div>

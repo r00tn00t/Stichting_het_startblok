@@ -100,7 +100,7 @@ export default function App() {
         />
         <Route
           path="vakanties"
-          element={<RolVereist minRol="coordinator"><VakantiesPage /></RolVereist>}
+          element={<RolVereist minRol="directie"><VakantiesPage /></RolVereist>}
         />
         <Route
           path="afspraken"
