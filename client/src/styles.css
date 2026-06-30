@@ -97,12 +97,13 @@ body {
   }
   .topbar .user { display: none; }
 
-  /* Nav wordt een uitklapbaar paneel onder de balk. */
+  /* Nav wordt een uitklapbaar paneel onder de balk: gewone full-width blok
+     binnen de topbar-padding (geen negatieve marges → valt nooit buiten beeld). */
   .topbar nav {
-    order: 3; width: 100%;
-    display: none; flex-direction: column; gap: 4px;
-    margin: 8px -16px -12px; padding: 8px 16px 12px;
-    background: var(--color-primary);
+    order: 3; width: 100%; box-sizing: border-box;
+    display: none; flex-direction: column; gap: 6px;
+    margin: 10px 0 0; padding: 10px;
+    background: rgba(0, 0, 0, 0.12); border-radius: 12px;
   }
   .topbar nav.nav-open { display: flex; }
   .topbar nav a {
