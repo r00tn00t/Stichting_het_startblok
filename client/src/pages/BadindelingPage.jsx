@@ -199,10 +199,14 @@ export default function BadindelingPage() {
       .filter((b) => b.zones.some((z) => z.kinderen.some((k) => k.leerling === leerlingId)))
       .map((b) => b.label || '?');
   }
-  // 'Nog in te delen' voor het open blok: kinderen die in DIT blok nog nergens staan.
-  // (Een kind kan in meerdere blokken zwemmen, dus dit is per blok.)
+  // 'Nog in te delen' voor het open blok: kinderen die in DIT blok nog nergens
+  // staan ÉN die volgens hun profiel in dit tijdsblok zwemmen. Kinderen zonder
+  // ingevulde zwemtijd tonen we ook (anders zijn ze nergens in te delen).
   const ingedeeldHier = ingedeeldInBlok(openBlok);
-  const nogIndelen = leerlingen.filter((l) => !ingedeeldHier.has(l._id));
+  const openLabel = blokken[openBlok]?.label || '';
+  const nogIndelen = leerlingen.filter(
+    (l) => !ingedeeldHier.has(l._id) && (!l.zwemtijd || l.zwemtijd === openLabel)
+  );
 
   // Plaats een leerling in een zone. Haalt 'm eerst uit andere zones BINNEN
   // hetzelfde blok (slepen tussen zones), maar laat 'm in andere blokken staan.
@@ -395,7 +399,7 @@ export default function BadindelingPage() {
           <div className="indeel-lijst noprint" onDragOver={(e) => e.preventDefault()} onDrop={onDropLijst}>
             <h3>Nog in te delen ({nogIndelen.length})</h3>
             <p className="muted" style={{ marginTop: -4, fontSize: 12 }}>
-              voor blok: <strong>{blokken[openBlok]?.label || '—'}</strong>
+              kinderen die om <strong>{blokken[openBlok]?.label || '—'}</strong> zwemmen
             </p>
             {nogIndelen.map((l) => {
               const andereBlokken = blokkenVanLeerling(l._id);
@@ -413,7 +417,7 @@ export default function BadindelingPage() {
                 </div>
               );
             })}
-            {nogIndelen.length === 0 && <p className="muted">Iedereen is ingedeeld in dit blok.</p>}
+            {nogIndelen.length === 0 && <p className="muted">Geen kinderen meer in te delen voor dit tijdsblok.</p>}
             <p className="muted hint">Sleep een kind naar een zone. Sleep terug hierheen om uit dit blok te halen.</p>
           </div>
 
