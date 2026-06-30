@@ -21,16 +21,19 @@ export default function KennisbankPage() {
   const magVerwijderen = heeftRol('coordinator');
 
   const [items, setItems] = useState([]);
-  const [filter, setFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState(''); // filter op type (oefening/tip/...)
   const [form, setForm] = useState(leegItem);
   const [toonForm, setToonForm] = useState(false);
   const [fout, setFout] = useState('');
 
   function laad() {
-    const pad = filter ? `/kennisbank?categorie=${filter}` : '/kennisbank';
-    api(pad).then(setItems).catch((e) => setFout(e.message));
+    api('/kennisbank').then(setItems).catch((e) => setFout(e.message));
   }
-  useEffect(laad, [filter]);
+  useEffect(laad, []);
+
+  // Filter client-side op type; toon alleen typen die ook echt voorkomen.
+  const beschikbareTypes = [...new Set(items.map((i) => i.type))];
+  const zichtbaar = typeFilter ? items.filter((i) => i.type === typeFilter) : items;
 
   const set = (veld) => (e) => setForm({ ...form, [veld]: e.target.value });
 
@@ -106,16 +109,20 @@ export default function KennisbankPage() {
 
       <div className="filter-rij">
         <label>
-          Filter op categorie:&nbsp;
-          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <option value="">Alle</option>
-            {CATEGORIEEN.map((c) => <option key={c} value={c}>{c}</option>)}
+          Filter op type:&nbsp;
+          <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+            <option value="">Alle ({items.length})</option>
+            {beschikbareTypes.map((t) => (
+              <option key={t} value={t}>
+                {typeLabel[t] || t} ({items.filter((i) => i.type === t).length})
+              </option>
+            ))}
           </select>
         </label>
       </div>
 
       <div className="kennis-lijst">
-        {items.map((item) => (
+        {zichtbaar.map((item) => (
           <div key={item._id} className="card">
             <span className="badge">{typeLabel[item.type]}</span>
             {item.categorie?.map((c) => <span key={c} className="badge">{c}</span>)}
@@ -129,7 +136,7 @@ export default function KennisbankPage() {
             )}
           </div>
         ))}
-        {items.length === 0 && <p className="muted">Geen items gevonden.</p>}
+        {zichtbaar.length === 0 && <p className="muted">Geen items gevonden.</p>}
       </div>
     </div>
   );
