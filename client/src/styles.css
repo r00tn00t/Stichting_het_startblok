@@ -372,6 +372,7 @@ form button[type="submit"] { margin-top: 16px; }
 .kind-kaarten { display: flex; flex-direction: column; gap: 10px; }
 .kind-kaart { border: 1px solid var(--rand); border-left: 4px solid var(--color-accent); border-radius: 10px; padding: 12px; background: #fff; }
 .kind-kaart-kop { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.kind-kaart-badges { display: inline-flex; gap: 6px; flex-shrink: 0; }
 .kind-kaart-kop .leerling-naam-link { font-size: 17px; }
 .kind-kaart-opm { font-size: 14px; margin: 6px 0 10px; }
 .aw-knoppen-breed { display: flex; gap: 8px; }
@@ -514,8 +515,16 @@ form button[type="submit"] { margin-top: 16px; }
 
 /* --- Responsief --- */
 @media (max-width: 768px) {
-  .dl { grid-template-columns: 1fr; }
-  .dl dt { margin-top: 8px; }
+  .dl { grid-template-columns: 1fr; gap: 0; }
+  .dl dt {
+    margin-top: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--grijs);
+  }
+  .dl dd {
+    margin: 1px 0 10px; padding-bottom: 10px; font-size: 15px;
+    border-bottom: 1px solid var(--rand);
+  }
+  .dl dd:last-child { border-bottom: none; }
 }
 
 /* ===================== Mobiel (telefoon) ===================== */

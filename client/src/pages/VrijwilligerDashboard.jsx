@@ -29,8 +29,11 @@ export default function VrijwilligerDashboard() {
   const [awStatus, setAwStatus] = useState({});    // { leerlingId: 'aanwezig'|'afgemeld'|'afwezig' }
   const [mijnActiviteiten, setMijnActiviteiten] = useState([]); // weekdagen van mijn lessen
   const [vakanties, setVakanties] = useState([]);
+  const [awSamenvatting, setAwSamenvatting] = useState({}); // { leerlingId: {percentage, aanwezig, totaal} }
   const [fout, setFout] = useState('');
   const [melding, setMelding] = useState('');
+
+  const awKlasse = (p) => (p >= 80 ? 'aw-aanwezig' : p >= 50 ? 'aw-afgemeld' : 'aw-afwezig');
 
   function laadDag() {
     api(`/badindelingen/mijn?datum=${datum}`).then(setVandaag).catch((e) => setFout(e.message));
@@ -40,6 +43,7 @@ export default function VrijwilligerDashboard() {
   useEffect(() => {
     api('/activiteiten').then(setMijnActiviteiten).catch(() => {});
     api('/vakanties').then(setVakanties).catch(() => {});
+    api('/aanwezigheid/samenvatting').then(setAwSamenvatting).catch(() => {});
     api('/leerlingen').then(setDeelnemers).catch((e) => setFout(e.message));
   }, []);
 
@@ -134,17 +138,18 @@ export default function VrijwilligerDashboard() {
               {/* Desktop: tabel */}
               <table className="tabel leerlingen-tabel alleen-desktop">
                 <thead>
-                  <tr><th>Naam</th><th>Beperking</th><th>Niveau</th><th>Aanwezigheid</th><th>Belangrijke opmerkingen</th></tr>
+                  <tr><th>Naam</th><th>Beperking</th><th>%</th><th>Vandaag</th><th>Belangrijke opmerkingen</th></tr>
                 </thead>
                 <tbody>
                   {groep.kinderen.map((k) => {
                     const l = k.leerling || {};
                     const status = awStatus[l._id] || 'aanwezig';
+                    const aw = awSamenvatting[l._id];
                     return (
                       <tr key={l._id}>
                         <td><a onClick={() => navigate(`/leerlingen/${l._id}`)} className="leerling-naam-link">{l.naam}</a></td>
                         <td className="muted">{l.typeBeperking || '—'}</td>
-                        <td>{k.niveau || l.niveau ? <span className="badge">{k.niveau || l.niveau}</span> : '—'}</td>
+                        <td>{aw ? <span className={`aw-chip ${awKlasse(aw.percentage)}`}>{aw.percentage}%</span> : <span className="muted">—</span>}</td>
                         <td>
                           <span className="aw-knoppen">
                             {['aanwezig', 'afgemeld', 'afwezig'].map((st) => (
@@ -169,11 +174,15 @@ export default function VrijwilligerDashboard() {
                 {groep.kinderen.map((k) => {
                   const l = k.leerling || {};
                   const status = awStatus[l._id] || 'aanwezig';
+                  const aw = awSamenvatting[l._id];
                   return (
                     <div key={l._id} className="kind-kaart">
                       <div className="kind-kaart-kop">
                         <a onClick={() => navigate(`/leerlingen/${l._id}`)} className="leerling-naam-link">{l.naam}</a>
-                        {(k.niveau || l.niveau) && <span className="badge">{k.niveau || l.niveau}</span>}
+                        <span className="kind-kaart-badges">
+                          {(k.niveau || l.niveau) && <span className="badge">{k.niveau || l.niveau}</span>}
+                          {aw && <span className={`aw-chip ${awKlasse(aw.percentage)}`}>{aw.percentage}%</span>}
+                        </span>
                       </div>
                       {(heeftKritiek(l) || opmerkingen(l) !== '—') && (
                         <p className="kind-kaart-opm">
