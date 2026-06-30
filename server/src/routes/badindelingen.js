@@ -94,7 +94,7 @@ router.get('/mijn', asyncHandler(async (req, res) => {
   const indelingen = await Badindeling.find({ datum: { $gte: dag, $lt: dagEinde } })
     .populate('activiteit', 'naam weekdag tijd')
     .populate('blokken.zones.vrijwilliger', 'naam')
-    .populate('blokken.zones.kinderen.leerling', 'naam typeBeperking zwemtijd communicatieTips medischeAandachtspunten');
+    .populate('blokken.zones.kinderen.leerling', 'naam typeBeperking zwemtijd communicatieTips medischeAandachtspunten medicijnen medicijnenWelke medicijnenLetOp');
 
   const resultaat = [];
   for (const ind of indelingen) {

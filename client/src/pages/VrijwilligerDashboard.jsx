@@ -11,14 +11,17 @@ function datumPlusDagen(iso, n) { const d = new Date(iso); d.setDate(d.getDate()
 const korteDatum = (iso) => new Date(iso).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
 
 // Belangrijke opmerkingen: kritieke/belangrijke medische punten, anders tips.
+const medicijnKritiek = (l) => l.medicijnen && l.medicijnenLetOp;
 function opmerkingen(l) {
   const punten = (l.medischeAandachtspunten || [])
     .filter((a) => a.urgentie === 'kritiek' || a.urgentie === 'belangrijk')
     .map((a) => a.titel);
+  if (medicijnKritiek(l)) punten.unshift('Medicijnen (let op)');
   if (punten.length) return punten.join(', ');
   return l.communicatieTips || '—';
 }
-const heeftKritiek = (l) => (l.medischeAandachtspunten || []).some((a) => a.urgentie === 'kritiek');
+const heeftKritiek = (l) =>
+  medicijnKritiek(l) || (l.medischeAandachtspunten || []).some((a) => a.urgentie === 'kritiek');
 
 export default function VrijwilligerDashboard() {
   const navigate = useNavigate();

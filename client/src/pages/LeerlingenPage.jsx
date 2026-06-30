@@ -19,11 +19,19 @@ export default function LeerlingenPage() {
   // Kleur op basis van percentage: groen hoog, oranje midden, rood laag.
   const awKlasse = (p) => (p >= 80 ? 'aw-aanwezig' : p >= 50 ? 'aw-afgemeld' : 'aw-afwezig');
 
-  // Belangrijke opmerkingen: kritieke/belangrijke medische punten samengevat.
-  const belangrijkePunten = (l) =>
-    (l.medischeAandachtspunten || [])
+  // Medicijnen waar lesgevers rekening mee moeten houden = kritiek.
+  const medicijnKritiek = (l) => l.medicijnen && l.medicijnenLetOp;
+  const isKritiek = (l) =>
+    medicijnKritiek(l) || (l.medischeAandachtspunten || []).some((a) => a.urgentie === 'kritiek');
+
+  // Belangrijke opmerkingen: kritieke/belangrijke medische punten + medicijnen-let-op.
+  const belangrijkePunten = (l) => {
+    const punten = (l.medischeAandachtspunten || [])
       .filter((a) => a.urgentie === 'kritiek' || a.urgentie === 'belangrijk')
       .map((a) => a.titel);
+    if (medicijnKritiek(l)) punten.unshift('Medicijnen (let op)');
+    return punten;
+  };
 
   const gefilterd = leerlingen.filter((l) =>
     l.naam.toLowerCase().includes(zoek.toLowerCase())
@@ -59,7 +67,7 @@ export default function LeerlingenPage() {
           <tbody>
             {gefilterd.map((l) => {
               const punten = belangrijkePunten(l);
-              const kritiek = (l.medischeAandachtspunten || []).some((a) => a.urgentie === 'kritiek');
+              const kritiek = isKritiek(l);
               const aw = aanwezigheid[l._id];
               return (
                 <tr key={l._id} className="leerling-rij" onClick={() => navigate(`/leerlingen/${l._id}`)}>
