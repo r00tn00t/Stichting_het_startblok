@@ -364,6 +364,19 @@ form button[type="submit"] { margin-top: 16px; }
 .leerling-naam-link:hover { text-decoration: underline; }
 .opmerkingen-cel .badge.kritiek { margin-right: 6px; }
 
+/* Toon/verberg op basis van schermbreedte (desktop vs mobiel). */
+.alleen-mobiel { display: none; }
+.alleen-desktop { display: table; }
+
+/* Kind-kaart (mobiele weergave van 'mijn dag'). */
+.kind-kaarten { display: flex; flex-direction: column; gap: 10px; }
+.kind-kaart { border: 1px solid var(--rand); border-left: 4px solid var(--color-accent); border-radius: 10px; padding: 12px; background: #fff; }
+.kind-kaart-kop { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.kind-kaart-kop .leerling-naam-link { font-size: 17px; }
+.kind-kaart-opm { font-size: 14px; margin: 6px 0 10px; }
+.aw-knoppen-breed { display: flex; gap: 8px; }
+.aw-knoppen-breed .aw-btn { flex: 1; padding: 12px 6px; font-size: 14px; text-align: center; }
+
 /* --- Snelkiezer lesdagen (vrijwilliger-dashboard) --- */
 .lesdag-kiezer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
 .lesdag-chip {
@@ -551,6 +564,23 @@ form button[type="submit"] { margin-top: 16px; }
 
   /* Minder essentiële tabelkolommen verbergen op telefoon. */
   .mobiel-verberg { display: none; }
+
+  /* Desktop-tabel verbergen, mobiele kaarten tonen. */
+  .alleen-desktop { display: none !important; }
+  .alleen-mobiel { display: block; }
+
+  /* Tabs vullen de breedte en zijn beter aan te tikken. */
+  .tabs { gap: 6px; }
+  .tabs .tab { flex: 1; padding: 10px 8px; font-size: 13px; text-align: center; }
+
+  /* Lesdag-snelkiezer: chips onder elkaar/ruim, label op eigen regel. */
+  .lesdag-kiezer { flex-direction: column; align-items: stretch; }
+  .lesdag-kiezer .muted { margin-bottom: 2px; }
+  .lesdag-chip { width: 100%; text-align: center; padding: 11px; font-size: 15px; }
+
+  /* 'Aanwezigheid opslaan'-knop onder de titel, volle breedte. */
+  .kind-kaarten + *, .card .kop-rij > button { width: 100%; }
+  .card .kop-rij { flex-direction: column; align-items: stretch; }
 }
 
 /* Heel smalle schermen: nóg compacter. */

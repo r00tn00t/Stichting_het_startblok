@@ -131,9 +131,10 @@ export default function VrijwilligerDashboard() {
                 </h3>
                 <button onClick={() => slaAanwezigheidOp(groep)}>Aanwezigheid opslaan</button>
               </div>
-              <table className="tabel leerlingen-tabel">
+              {/* Desktop: tabel */}
+              <table className="tabel leerlingen-tabel alleen-desktop">
                 <thead>
-                  <tr><th>Naam</th><th className="mobiel-verberg">Beperking</th><th className="mobiel-verberg">Niveau</th><th>Aanwezigheid</th><th>Belangrijke opmerkingen</th></tr>
+                  <tr><th>Naam</th><th>Beperking</th><th>Niveau</th><th>Aanwezigheid</th><th>Belangrijke opmerkingen</th></tr>
                 </thead>
                 <tbody>
                   {groep.kinderen.map((k) => {
@@ -142,16 +143,12 @@ export default function VrijwilligerDashboard() {
                     return (
                       <tr key={l._id}>
                         <td><a onClick={() => navigate(`/leerlingen/${l._id}`)} className="leerling-naam-link">{l.naam}</a></td>
-                        <td className="muted mobiel-verberg">{l.typeBeperking || '—'}</td>
-                        <td className="mobiel-verberg">{k.niveau || l.niveau ? <span className="badge">{k.niveau || l.niveau}</span> : '—'}</td>
+                        <td className="muted">{l.typeBeperking || '—'}</td>
+                        <td>{k.niveau || l.niveau ? <span className="badge">{k.niveau || l.niveau}</span> : '—'}</td>
                         <td>
                           <span className="aw-knoppen">
                             {['aanwezig', 'afgemeld', 'afwezig'].map((st) => (
-                              <button
-                                key={st}
-                                className={`aw-btn aw-${st} ${status === st ? 'aw-actief' : ''}`}
-                                onClick={() => setStatus(l._id, st)}
-                              >
+                              <button key={st} className={`aw-btn aw-${st} ${status === st ? 'aw-actief' : ''}`} onClick={() => setStatus(l._id, st)}>
                                 {st}
                               </button>
                             ))}
@@ -166,6 +163,35 @@ export default function VrijwilligerDashboard() {
                   })}
                 </tbody>
               </table>
+
+              {/* Mobiel: kaart per kind */}
+              <div className="alleen-mobiel kind-kaarten">
+                {groep.kinderen.map((k) => {
+                  const l = k.leerling || {};
+                  const status = awStatus[l._id] || 'aanwezig';
+                  return (
+                    <div key={l._id} className="kind-kaart">
+                      <div className="kind-kaart-kop">
+                        <a onClick={() => navigate(`/leerlingen/${l._id}`)} className="leerling-naam-link">{l.naam}</a>
+                        {(k.niveau || l.niveau) && <span className="badge">{k.niveau || l.niveau}</span>}
+                      </div>
+                      {(heeftKritiek(l) || opmerkingen(l) !== '—') && (
+                        <p className="kind-kaart-opm">
+                          {heeftKritiek(l) && <span className="badge kritiek">⚠ Kritiek</span>}
+                          {opmerkingen(l)}
+                        </p>
+                      )}
+                      <div className="aw-knoppen aw-knoppen-breed">
+                        {['aanwezig', 'afgemeld', 'afwezig'].map((st) => (
+                          <button key={st} className={`aw-btn aw-${st} ${status === st ? 'aw-actief' : ''}`} onClick={() => setStatus(l._id, st)}>
+                            {st}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </div>
