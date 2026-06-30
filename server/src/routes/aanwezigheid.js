@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { Aanwezigheid } from '../models/Aanwezigheid.js';
 import { Activiteit } from '../models/Activiteit.js';
 import { Leerling } from '../models/Leerling.js';
+import { Badindeling } from '../models/Badindeling.js';
 import { requireAuth, requireRole, loadUserScope } from '../middleware/auth.js';
 import { ROLES } from '../config/roles.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
@@ -61,6 +62,51 @@ router.put('/', requireRole(ROLES.COORDINATOR), asyncHandler(async (req, res) =>
 
   const ops = registraties
     .filter((r) => r.leerling && r.status)
+    .map((r) => ({
+      updateOne: {
+        filter: { leerling: r.leerling, activiteit, datum: dag },
+        update: { $set: { status: r.status, geregistreerdDoor: req.user.id } },
+        upsert: true,
+      },
+    }));
+  if (ops.length) await Aanwezigheid.bulkWrite(ops);
+  res.json({ ok: true, aantal: ops.length });
+}));
+
+// PUT /api/aanwezigheid/mijn — vrijwilliger registreert aanwezigheid voor de
+// kinderen die hém/haar op die datum zijn toegewezen (badindeling). Gescoped:
+// een vrijwilliger kan alleen de eigen toegewezen kinderen afvinken.
+// body: { activiteit, datum, registraties: [{ leerling, status }] }
+router.put('/mijn', asyncHandler(async (req, res) => {
+  const { activiteit, datum, registraties = [] } = req.body || {};
+  if (!activiteit || !datum) return res.status(400).json({ error: 'activiteit en datum zijn verplicht' });
+  const dag = dagStart(datum);
+  if (!dag) return res.status(400).json({ error: 'Ongeldige datum' });
+
+  // Coördinator/directie gebruiken gewoon de gewone PUT; dit endpoint is bedoeld
+  // voor vrijwilligers maar werkt voor iedereen die toegewezen kinderen heeft.
+  const dagEinde = new Date(dag.getTime() + 24 * 60 * 60 * 1000);
+  const indelingen = await Badindeling.find({
+    activiteit, datum: { $gte: dag, $lt: dagEinde }, 'blokken.zones.vrijwilliger': req.user.id,
+  });
+
+  // Verzamel de leerling-id's die aan deze gebruiker zijn toegewezen.
+  const toegestaan = new Set();
+  for (const ind of indelingen) {
+    for (const blok of ind.blokken) {
+      for (const zone of blok.zones) {
+        if (zone.vrijwilliger?.toString() === req.user.id) {
+          zone.kinderen.forEach((k) => toegestaan.add(k.leerling.toString()));
+        }
+      }
+    }
+  }
+  if (toegestaan.size === 0) {
+    return res.status(403).json({ error: 'Je hebt geen toegewezen kinderen voor deze les' });
+  }
+
+  const ops = registraties
+    .filter((r) => r.leerling && r.status && toegestaan.has(r.leerling.toString()))
     .map((r) => ({
       updateOne: {
         filter: { leerling: r.leerling, activiteit, datum: dag },

@@ -360,6 +360,8 @@ form button[type="submit"] { margin-top: 16px; }
 .leerling-rij { cursor: pointer; transition: background-color 0.1s; }
 .leerling-rij:hover { background: var(--color-soft-blue); }
 .opmerkingen-cel { max-width: 420px; }
+.leerling-naam-link { color: var(--color-primary); font-weight: 700; cursor: pointer; text-decoration: none; }
+.leerling-naam-link:hover { text-decoration: underline; }
 .opmerkingen-cel .badge.kritiek { margin-right: 6px; }
 
 /* --- Beheer-pagina --- */
