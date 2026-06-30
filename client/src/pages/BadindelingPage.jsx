@@ -108,10 +108,24 @@ export default function BadindelingPage() {
       zones: (b.zones || []).map((naam) => ({ naam, vrijwilliger: '', kinderen: [] })),
     }));
   }
+  // Tellen hoeveel kinderen er al ingedeeld zijn (gaat verloren bij toepassen).
+  const aantalIngedeeld = blokken.reduce(
+    (n, b) => n + b.zones.reduce((m, z) => m + z.kinderen.length, 0), 0
+  );
+
   function pasTemplateToe(templateId) {
     const t = templates.find((x) => x._id === templateId);
-    if (!t) return;
+    if (!t) { setTemplateKeuze(''); return; }
+    // Waarschuwen als er al een indeling staat die overschreven wordt.
+    if (blokken.length > 0) {
+      const extra = aantalIngedeeld > 0 ? ` en ${aantalIngedeeld} ingedeeld(e) kind(eren)` : '';
+      const ok = window.confirm(
+        `Let op: de huidige badindeling${extra} wordt vervangen door template "${t.naam}". Doorgaan?`
+      );
+      if (!ok) { setTemplateKeuze(''); return; }
+    }
     setBlokken(templateNaarBlokken(t));
+    setTemplateKeuze('');
     setMelding(`Template "${t.naam}" toegepast. Deel in en sla op.`);
   }
 
@@ -352,13 +366,24 @@ export default function BadindelingPage() {
               <input type="date" value={kopieerDatum} onChange={(e) => setKopieerDatum(e.target.value)} />
               <button className="mini grijs" onClick={() => kopieerVan(kopieerDatum)}>Kopieer</button>
             </div>
-            <div className="kopieer-rij">
-              <span className="muted">Template:</span>
-              <select value={templateKeuze} onChange={(e) => { setTemplateKeuze(e.target.value); if (e.target.value) pasTemplateToe(e.target.value); }}>
-                <option value="">— kies een template —</option>
-                {locatieTemplates.map((t) => <option key={t._id} value={t._id}>{t.naam}</option>)}
-              </select>
-              {locatieTemplates.length === 0 && <span className="muted">(nog geen template voor deze locatie — maak er een onder “Sjablonen”)</span>}
+            <div className="template-toepassen">
+              <h3 className="template-toepassen-titel">📋 Template toepassen</h3>
+              {locatieTemplates.length === 0 ? (
+                <p className="muted">Nog geen template voor deze locatie — maak er een onder Beheer → Sjablonen.</p>
+              ) : (
+                <>
+                  <div className="kopieer-rij">
+                    <select value={templateKeuze} onChange={(e) => pasTemplateToe(e.target.value)}>
+                      <option value="">— kies een template —</option>
+                      {locatieTemplates.map((t) => <option key={t._id} value={t._id}>{t.naam}</option>)}
+                    </select>
+                  </div>
+                  <p className="muted template-waarschuwing">
+                    ⚠️ Let op: de huidige tijdsblokken en zones worden vervangen door de template.
+                    Reeds ingedeelde kinderen gaan daarbij verloren.
+                  </p>
+                </>
+              )}
             </div>
           </>
         )}

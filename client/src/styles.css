@@ -369,6 +369,11 @@ form button[type="submit"] { margin-top: 16px; }
 .status-knop { border: none; cursor: pointer; box-shadow: none; }
 .status-knop:hover { filter: brightness(0.95); transform: none; }
 
+/* --- Template toepassen (badindeling) --- */
+.template-toepassen { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rand); }
+.template-toepassen-titel { font-size: 1rem; margin: 0 0 8px; color: var(--color-primary); }
+.template-waarschuwing { font-size: 13px; color: #b45309; margin-top: 6px; }
+
 /* --- Badindeling weekagenda --- */
 .week-nav { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .week-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
