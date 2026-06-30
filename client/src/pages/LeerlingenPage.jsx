@@ -50,9 +50,9 @@ export default function LeerlingenPage() {
           <thead>
             <tr>
               <th>Naam</th>
-              <th>Beperking</th>
-              <th>Niveau</th>
-              <th>Zwemtijd</th>
+              <th className="mobiel-verberg">Beperking</th>
+              <th className="mobiel-verberg">Niveau</th>
+              <th className="mobiel-verberg">Zwemtijd</th>
               <th>Aanwezigheid</th>
               <th>Belangrijke opmerkingen</th>
             </tr>
@@ -65,9 +65,9 @@ export default function LeerlingenPage() {
               return (
                 <tr key={l._id} className="leerling-rij" onClick={() => navigate(`/leerlingen/${l._id}`)}>
                   <td><strong>{l.naam}</strong></td>
-                  <td className="muted">{l.typeBeperking || '—'}</td>
-                  <td>{l.niveau ? <span className="badge">{l.niveau}</span> : '—'}</td>
-                  <td className="muted">{l.zwemtijd || '—'}</td>
+                  <td className="muted mobiel-verberg">{l.typeBeperking || '—'}</td>
+                  <td className="mobiel-verberg">{l.niveau ? <span className="badge">{l.niveau}</span> : '—'}</td>
+                  <td className="muted mobiel-verberg">{l.zwemtijd || '—'}</td>
                   <td>
                     {aw
                       ? <span className={`aw-chip ${awKlasse(aw.percentage)}`}>{aw.percentage}% ({aw.aanwezig}/{aw.totaal})</span>

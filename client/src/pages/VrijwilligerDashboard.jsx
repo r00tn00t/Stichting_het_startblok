@@ -133,7 +133,7 @@ export default function VrijwilligerDashboard() {
               </div>
               <table className="tabel leerlingen-tabel">
                 <thead>
-                  <tr><th>Naam</th><th>Beperking</th><th>Niveau</th><th>Aanwezigheid</th><th>Belangrijke opmerkingen</th></tr>
+                  <tr><th>Naam</th><th className="mobiel-verberg">Beperking</th><th className="mobiel-verberg">Niveau</th><th>Aanwezigheid</th><th>Belangrijke opmerkingen</th></tr>
                 </thead>
                 <tbody>
                   {groep.kinderen.map((k) => {
@@ -142,8 +142,8 @@ export default function VrijwilligerDashboard() {
                     return (
                       <tr key={l._id}>
                         <td><a onClick={() => navigate(`/leerlingen/${l._id}`)} className="leerling-naam-link">{l.naam}</a></td>
-                        <td className="muted">{l.typeBeperking || '—'}</td>
-                        <td>{k.niveau || l.niveau ? <span className="badge">{k.niveau || l.niveau}</span> : '—'}</td>
+                        <td className="muted mobiel-verberg">{l.typeBeperking || '—'}</td>
+                        <td className="mobiel-verberg">{k.niveau || l.niveau ? <span className="badge">{k.niveau || l.niveau}</span> : '—'}</td>
                         <td>
                           <span className="aw-knoppen">
                             {['aanwezig', 'afgemeld', 'afwezig'].map((st) => (

@@ -504,3 +504,58 @@ form button[type="submit"] { margin-top: 16px; }
   .dl { grid-template-columns: 1fr; }
   .dl dt { margin-top: 8px; }
 }
+
+/* ===================== Mobiel (telefoon) ===================== */
+@media (max-width: 640px) {
+  /* Content vult het scherm met kleine marge; minder afronding. */
+  .content, .content-breed {
+    margin: 12px 8px; padding: 14px; border-radius: 12px;
+  }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+
+  /* Inputs minimaal 16px zodat iOS niet inzoomt bij focus. */
+  input, select, textarea, .notitie-input { font-size: 16px !important; }
+  .zoek { max-width: 100%; }
+
+  /* Cards iets compacter. */
+  .card { padding: 1rem; }
+
+  /* Brede tabellen scrollen horizontaal binnen hun kaart; nettere tap-grootte. */
+  .tabel th, .tabel td { padding: 10px 8px; }
+  .tabel th { font-size: 0.7rem; }
+  .opmerkingen-cel { max-width: none; }
+
+  /* Grids naar één kolom. */
+  .grid { grid-template-columns: 1fr; }
+
+  /* Knoppen iets groter voor vingers; kop-rij knoppen mogen breken. */
+  button, .knop-link { padding: 10px 16px; }
+  .kop-rij { gap: 8px; }
+  .kop-rij > div { flex-wrap: wrap; }
+
+  /* Aanwezigheid-knoppen onder elkaar passend. */
+  .aw-knoppen { flex-wrap: wrap; }
+  .aw-btn { padding: 8px 12px; }
+
+  /* Badindeling: lijst en rooster onder elkaar (werkblad is al kolom <700px). */
+  .indeel-lijst { position: static; max-height: none; }
+  .zones { gap: 10px; }
+  .zone { flex-basis: 160px; }
+
+  /* Weekagenda: dagen onder elkaar (was al, hier bevestigd). */
+  .week-grid { grid-template-columns: 1fr; }
+
+  /* Topbar-gebruikersinfo compacter. */
+  .user-info { display: none; }
+
+  /* Minder essentiële tabelkolommen verbergen op telefoon. */
+  .mobiel-verberg { display: none; }
+}
+
+/* Heel smalle schermen: nóg compacter. */
+@media (max-width: 380px) {
+  .topbar { padding: 10px 12px; }
+  .brand { font-size: 18px; }
+  .brand img { max-height: 34px; }
+}
