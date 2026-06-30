@@ -17,6 +17,8 @@ import AanwezigheidPage from './pages/AanwezigheidPage.jsx';
 import BeheerPage from './pages/BeheerPage.jsx';
 import NiveausPage from './pages/NiveausPage.jsx';
 import VakantiesPage from './pages/VakantiesPage.jsx';
+import AgendaPage from './pages/AgendaPage.jsx';
+import AfsprakenPage from './pages/AfsprakenPage.jsx';
 import BadindelingPage from './pages/BadindelingPage.jsx';
 import VrijwilligerDashboard from './pages/VrijwilligerDashboard.jsx';
 
@@ -70,6 +72,7 @@ export default function App() {
           path="leerlingen/:id/bewerken"
           element={<RolVereist minRol="coordinator"><LeerlingFormPage /></RolVereist>}
         />
+        <Route path="agenda" element={<AgendaPage />} />
         <Route path="kennisbank" element={<KennisbankPage />} />
         <Route
           path="badindeling"
@@ -98,6 +101,10 @@ export default function App() {
         <Route
           path="vakanties"
           element={<RolVereist minRol="coordinator"><VakantiesPage /></RolVereist>}
+        />
+        <Route
+          path="afspraken"
+          element={<RolVereist minRol="directie"><AfsprakenPage /></RolVereist>}
         />
         <Route
           path="gebruikers"
