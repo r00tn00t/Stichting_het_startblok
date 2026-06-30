@@ -145,8 +145,8 @@ export default function InschrijvingPage() {
             Mijn kind heeft eerder deelgenomen aan zwemlessen
           </label>
           {form.eerderGezwommen && (
-            <label className="vol">Zo ja, welk niveau / club / hoe lang?
-              <textarea value={form.eerderToelichting} onChange={set('eerderToelichting')} rows={2} />
+            <label className="vol">Vertel zoveel mogelijk over de zwemervaring (welk niveau/badje, bij welke club of school, hoe lang, wat ging goed/lastig)
+              <textarea value={form.eerderToelichting} onChange={set('eerderToelichting')} rows={4} />
             </label>
           )}
         </section>

@@ -67,6 +67,12 @@ const leerlingSchema = new mongoose.Schema(
     beperkingOmschrijving: { type: String, default: '' },
     fysiotherapie: { type: Boolean, default: false },
     fysiotherapiePraktijk: { type: String, default: '' },
+
+    // Medicijnen (eigen sectie op het dossier).
+    medicijnen: { type: Boolean, default: false },
+    medicijnenWelke: { type: String, default: '' },
+    medicijnenLetOp: { type: Boolean, default: false },   // lesgevers rekening houden?
+    medicijnenInstructie: { type: String, default: '' },  // waar op letten
     aandachtspunten: [{ type: String }],   // bv. waterangst, concentratieproblemen
 
     // Media-toestemming (AVG).

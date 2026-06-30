@@ -34,16 +34,7 @@ function bouwAandachtspunten(ins) {
   if (ins.allergieen) {
     punten.push({ titel: 'Allergieën', omschrijving: ins.allergieenWelke || '', urgentie: 'belangrijk' });
   }
-  if (ins.medicijnen) {
-    // Combineer 'welke' + eventuele instructie voor de begeleiders.
-    const delen = [ins.medicijnenWelke, ins.medicijnenInstructie].filter(Boolean);
-    punten.push({
-      titel: 'Medicijngebruik',
-      omschrijving: delen.join(' — ') || '',
-      // Als de lesgevers er rekening mee moeten houden: kritiek, anders belangrijk.
-      urgentie: ins.medicijnenLetOp ? 'kritiek' : 'belangrijk',
-    });
-  }
+  // Medicijnen krijgen een eigen sectie op het dossier (niet hier als aandachtspunt).
   for (const a of ins.aandoeningen || []) {
     punten.push({ titel: a, omschrijving: '', urgentie: 'info' });
   }
@@ -73,6 +64,10 @@ router.post('/:id/goedkeuren', asyncHandler(async (req, res) => {
     aandachtspunten,
     fysiotherapie: ins.fysiotherapie,
     fysiotherapiePraktijk: ins.fysiotherapiePraktijk,
+    medicijnen: ins.medicijnen,
+    medicijnenWelke: ins.medicijnenWelke,
+    medicijnenLetOp: ins.medicijnenLetOp,
+    medicijnenInstructie: ins.medicijnenInstructie,
     communicatieTips: '',
     watWerktWel: '',
     watWerktNiet: ins.overigeInformatie || '',

@@ -103,8 +103,8 @@ async function run() {
 
     const aandacht = [];
     if (i % 4 === 0) aandacht.push({ titel: 'Toevallen / epilepsie', omschrijving: 'Let op bij vermoeidheid; volg het protocol.', urgentie: 'kritiek' });
-    if (i % 3 === 0) aandacht.push({ titel: 'Medicijngebruik', omschrijving: 'Gebruikt medicatie; navragen bij ouders.', urgentie: 'belangrijk' });
     if (i % 5 === 0) aandacht.push({ titel: 'Allergieën', omschrijving: 'Pinda-allergie.', urgentie: 'belangrijk' });
+    const gebruiktMed = i % 3 === 0;
 
     await Leerling.create({
       naam,
@@ -124,8 +124,12 @@ async function run() {
       zwemtijd: pick(TIJDSLOTS, i),
       fysiotherapie: i % 3 === 0,
       fysiotherapiePraktijk: i % 3 === 0 ? 'FysioCentrum' : '',
+      medicijnen: gebruiktMed,
+      medicijnenWelke: gebruiktMed ? pick(['Ritalin', 'Concerta', 'Astma-inhalator', 'Anti-epilepticum'], i) : '',
+      medicijnenLetOp: gebruiktMed && i % 6 === 0,
+      medicijnenInstructie: gebruiktMed && i % 6 === 0 ? 'Inhalator binnen handbereik; bij benauwdheid uit het water.' : '',
       eerderGezwommen: i % 2 === 0,
-      eerderToelichting: i % 2 === 0 ? 'Eerder Badje 1 gevolgd bij een andere club (half jaar).' : '',
+      eerderToelichting: i % 2 === 0 ? 'Eerder Badje 1 gevolgd bij een andere club, ongeveer een half jaar. Kan met drijfmiddel zelfstandig watertrappelen, maar is nog onzeker met het gezicht onder water.' : '',
       straatnaam: pick(STRATEN, i),
       huisnummer: String((i % 120) + 1),
       postcode: `${3000 + (i % 900)} ${String.fromCharCode(65 + (i % 26))}${String.fromCharCode(65 + ((i + 7) % 26))}`,

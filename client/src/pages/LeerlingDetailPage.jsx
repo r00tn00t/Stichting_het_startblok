@@ -44,9 +44,37 @@ export default function LeerlingDetailPage() {
           <dt>Communicatietips</dt><dd>{leerling.communicatieTips || '—'}</dd>
           <dt>Wat werkt wel</dt><dd>{leerling.watWerktWel || '—'}</dd>
           <dt>Wat werkt niet</dt><dd>{leerling.watWerktNiet || '—'}</dd>
-          <dt>Eerder gezwommen</dt><dd>{leerling.eerderGezwommen ? `Ja${leerling.eerderToelichting ? ` — ${leerling.eerderToelichting}` : ''}` : 'Nee'}</dd>
           <dt>Fysiotherapie</dt><dd>{leerling.fysiotherapie ? `Ja${leerling.fysiotherapiePraktijk ? ` — ${leerling.fysiotherapiePraktijk}` : ''}` : 'Nee'}</dd>
         </dl>
+      </div>
+
+      <div className={`card ${leerling.medicijnen && leerling.medicijnenLetOp ? 'card-kritiek' : ''}`}>
+        <h2>💊 Medicijnen</h2>
+        {leerling.medicijnen ? (
+          <dl className="dl">
+            <dt>Gebruikt medicijnen</dt><dd>Ja{leerling.medicijnenWelke ? ` — ${leerling.medicijnenWelke}` : ''}</dd>
+            <dt>Lesgevers rekening houden</dt>
+            <dd>
+              {leerling.medicijnenLetOp
+                ? <><span className="badge kritiek">⚠ Ja</span> {leerling.medicijnenInstructie || ''}</>
+                : 'Nee'}
+            </dd>
+          </dl>
+        ) : (
+          <p className="muted">Geen medicijngebruik opgegeven.</p>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>🏊 Zwemervaring</h2>
+        {leerling.eerderGezwommen ? (
+          <>
+            <p>Heeft eerder zwemles gehad.</p>
+            <p className="kennis-inhoud">{leerling.eerderToelichting || <span className="muted">Geen toelichting opgegeven.</span>}</p>
+          </>
+        ) : (
+          <p className="muted">Geen eerdere zwemervaring opgegeven.</p>
+        )}
       </div>
 
       <div className="card">

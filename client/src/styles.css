@@ -141,6 +141,9 @@ h2 {
 }
 h3 { font-size: 1.3rem; color: var(--color-accent); }
 
+/* Kaart met rode accentbalk voor kritieke info (bv. medicijnen-let-op). */
+.card-kritiek { border-left-color: var(--rood); }
+
 /* --- Cards --- */
 .card {
   background: var(--color-white);
