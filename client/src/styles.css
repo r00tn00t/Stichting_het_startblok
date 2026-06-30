@@ -364,6 +364,15 @@ form button[type="submit"] { margin-top: 16px; }
 .leerling-naam-link:hover { text-decoration: underline; }
 .opmerkingen-cel .badge.kritiek { margin-right: 6px; }
 
+/* --- Snelkiezer lesdagen (vrijwilliger-dashboard) --- */
+.lesdag-kiezer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.lesdag-chip {
+  background: #eef0f3; color: #344054; box-shadow: none;
+  border-radius: 1.5rem; padding: 7px 14px; font-size: 14px; text-transform: capitalize;
+}
+.lesdag-chip:first-of-type { background: var(--color-light-bg); color: var(--color-primary); font-weight: 800; }
+.lesdag-chip.actief { background: var(--color-primary); color: #fff; }
+
 /* --- Beheer-pagina --- */
 .beheer-kaart { text-decoration: none; color: inherit; display: block; transition: transform 0.15s, box-shadow 0.2s; }
 .beheer-kaart:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 108, 183, 0.18); }

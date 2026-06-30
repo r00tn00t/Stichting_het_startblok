@@ -5,6 +5,10 @@ import { api } from '../api/client.js';
 function vandaagISO() {
   return new Date().toISOString().slice(0, 10);
 }
+const WEEKDAGEN = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
+const weekdagVan = (iso) => WEEKDAGEN[new Date(iso).getDay()];
+function datumPlusDagen(iso, n) { const d = new Date(iso); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+const korteDatum = (iso) => new Date(iso).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
 
 // Belangrijke opmerkingen: kritieke/belangrijke medische punten, anders tips.
 function opmerkingen(l) {
@@ -23,6 +27,8 @@ export default function VrijwilligerDashboard() {
   const [vandaag, setVandaag] = useState([]);      // [{ activiteit, kinderen[] }]
   const [deelnemers, setDeelnemers] = useState([]); // alle kinderen van mijn activiteit(en)
   const [awStatus, setAwStatus] = useState({});    // { leerlingId: 'aanwezig'|'afgemeld'|'afwezig' }
+  const [mijnActiviteiten, setMijnActiviteiten] = useState([]); // weekdagen van mijn lessen
+  const [vakanties, setVakanties] = useState([]);
   const [fout, setFout] = useState('');
   const [melding, setMelding] = useState('');
 
@@ -32,6 +38,8 @@ export default function VrijwilligerDashboard() {
   useEffect(laadDag, [datum]);
 
   useEffect(() => {
+    api('/activiteiten').then(setMijnActiviteiten).catch(() => {});
+    api('/vakanties').then(setVakanties).catch(() => {});
     api('/leerlingen').then(setDeelnemers).catch((e) => setFout(e.message));
   }, []);
 
@@ -50,6 +58,19 @@ export default function VrijwilligerDashboard() {
   const aantalVandaag = vandaag.reduce((n, g) => n + (g.kinderen?.length || 0), 0);
 
   const setStatus = (leerlingId, status) => setAwStatus((s) => ({ ...s, [leerlingId]: status }));
+
+  // Komende lesdagen van de vrijwilliger: de eerstvolgende datums (vanaf vandaag)
+  // die vallen op een weekdag van een van mijn activiteiten en niet in vakantie.
+  const inVakantie = (iso) => {
+    const t = new Date(iso).getTime();
+    return vakanties.some((v) => t >= new Date(v.van).getTime() && t <= new Date(v.tot).getTime());
+  };
+  const mijnWeekdagen = new Set(mijnActiviteiten.map((a) => a.weekdag).filter(Boolean));
+  const komendeLesdagen = [];
+  for (let d = 0; d < 60 && komendeLesdagen.length < 5; d++) {
+    const iso = datumPlusDagen(vandaagISO(), d);
+    if (mijnWeekdagen.has(weekdagVan(iso)) && !inVakantie(iso)) komendeLesdagen.push(iso);
+  }
 
   // Aanwezigheid opslaan voor één activiteit-groep (alleen eigen kinderen).
   async function slaAanwezigheidOp(groep) {
@@ -80,8 +101,22 @@ export default function VrijwilligerDashboard() {
 
       {tab === 'vandaag' && (
         <div>
+          {komendeLesdagen.length > 0 && (
+            <div className="lesdag-kiezer">
+              <span className="muted">Snel naar les:</span>
+              {komendeLesdagen.map((iso, i) => (
+                <button
+                  key={iso}
+                  className={`lesdag-chip ${datum === iso ? 'actief' : ''}`}
+                  onClick={() => setDatum(iso)}
+                >
+                  {i === 0 ? `Eerstvolgende — ${korteDatum(iso)}` : korteDatum(iso)}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="filter-rij">
-            <label>Datum:&nbsp;<input type="date" value={datum} onChange={(e) => setDatum(e.target.value)} /></label>
+            <label>Of kies datum:&nbsp;<input type="date" value={datum} onChange={(e) => setDatum(e.target.value)} /></label>
           </div>
           {aantalVandaag === 0 && (
             <p className="muted">Je hebt vandaag nog geen kinderen toegewezen gekregen. Vraag je coördinator om de badindeling.</p>
